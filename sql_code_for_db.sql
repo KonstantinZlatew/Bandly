@@ -1,0 +1,136 @@
+CREATE TABLE users (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(100) NOT NULL UNIQUE,
+  email VARCHAR(255) DEFAULT NULL,
+  password_hash VARCHAR(255) DEFAULT NULL, -- Ако решиш да добавиш парола по-късно
+  is_admin TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_login TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE user_profiles (
+  user_id BIGINT UNSIGNED PRIMARY KEY,
+  full_name VARCHAR(255),
+  country VARCHAR(100),
+  preferred_lang VARCHAR(10) DEFAULT 'en',
+  settings JSON DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE exams (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(50) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  created_by BIGINT UNSIGNED NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE exam_variants (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  exam_id BIGINT UNSIGNED NOT NULL,
+  variant_name VARCHAR(255),
+  metadata JSON DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (exam_id) REFERENCES exams(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE tasks (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  exam_variant_id BIGINT UNSIGNED NOT NULL,
+  task_type ENUM('writing','speaking','listening','reading') NOT NULL,
+  task_number INT NOT NULL,
+  prompt TEXT NOT NULL,
+  max_score DECIMAL(5,2) DEFAULT 9.00,
+  rubric_id BIGINT UNSIGNED NULL,
+  extra JSON DEFAULT NULL,
+  FOREIGN KEY (exam_variant_id) REFERENCES exam_variants(id) ON DELETE CASCADE,
+  FOREIGN KEY (rubric_id) REFERENCES rubrics(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE rubrics (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(255),
+  task_type ENUM('writing','speaking') NOT NULL,
+  criteria JSON NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE writing_submissions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  exam_variant_id BIGINT UNSIGNED NOT NULL,
+  task_id BIGINT UNSIGNED NOT NULL,
+  content TEXT NOT NULL,
+  word_count INT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  file_id BIGINT UNSIGNED NULL, -- ако имаш attachment
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (exam_variant_id) REFERENCES exam_variants(id) ON DELETE CASCADE,
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL,
+  INDEX(user_id), INDEX(exam_variant_id), INDEX(task_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE speaking_submissions (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  exam_variant_id BIGINT UNSIGNED NOT NULL,
+  task_id BIGINT UNSIGNED NOT NULL,
+  audio_url VARCHAR(1000) NOT NULL,
+  audio_duration_seconds INT DEFAULT NULL,
+  transcript TEXT DEFAULT NULL,
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  file_id BIGINT UNSIGNED NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (exam_variant_id) REFERENCES exam_variants(id) ON DELETE CASCADE,
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE SET NULL,
+  INDEX(user_id), INDEX(exam_variant_id), INDEX(task_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE evaluations (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  submission_type ENUM('writing','speaking') NOT NULL,
+  submission_id BIGINT UNSIGNED NOT NULL,
+  evaluator ENUM('ai','human') NOT NULL,
+  evaluator_id BIGINT UNSIGNED NULL,
+  overall_score DECIMAL(4,2) NOT NULL,
+  criteria_scores JSON DEFAULT NULL,
+  feedback TEXT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX (submission_type, submission_id),
+  FOREIGN KEY (evaluator_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE files (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  storage_key VARCHAR(1000) NOT NULL,
+  mime VARCHAR(100),
+  size_bytes BIGINT DEFAULT 0,
+  uploaded_by BIGINT UNSIGNED NULL,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+CREATE TABLE ai_jobs (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  submission_type ENUM('writing','speaking') NULL,
+  submission_id BIGINT UNSIGNED NULL,
+  model VARCHAR(100),
+  input JSON,
+  output JSON,
+  latency_ms INT DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
