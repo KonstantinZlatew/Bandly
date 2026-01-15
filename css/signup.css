@@ -6,7 +6,7 @@
 body {
     margin: 0;
     height: 100vh;
-    background: #f5f5f5; /* light / pale */
+    background: #f5f5f5;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -23,7 +23,7 @@ body {
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-top: 5px solid #c40000; /* red accent */
+    border-top: 5px solid #c40000;
 }
 
 .signup-card h1 {
@@ -76,7 +76,7 @@ button {
 }
 
 button:hover {
-    background: #c40000; /* red on hover */
+    background: #c40000;
 }
 
 .footer-text {

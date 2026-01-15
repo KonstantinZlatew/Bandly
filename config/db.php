@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 function db(): PDO {
     static $pdo = null;
-    if ($pdo instanceof PDO) return $pdo;
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
 
     $host = "localhost";
     $dbname = "ielts_evalai";

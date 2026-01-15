@@ -11,7 +11,7 @@ form.addEventListener("submit", async function (e) {
 
   hideMessage();
 
-  // Frontend validation (UX)
+  // Frontend Validation
   if (!username || !email || !password || !confirmPassword) {
     showMessage("Please fill in all fields.", "error");
     return;
@@ -33,7 +33,6 @@ form.addEventListener("submit", async function (e) {
     return;
   }
 
-  // Call backend
   try {
     const res = await fetch("api/signup.php", {
       method: "POST",
