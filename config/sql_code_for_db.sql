@@ -10,6 +10,7 @@ CREATE TABLE users (
 
 
 CREATE TABLE user_profiles (
+  profile_picture_url VARCHAR(1000) DEFAULT NULL,
   user_id BIGINT UNSIGNED PRIMARY KEY,
   full_name VARCHAR(255),
   country VARCHAR(100),
@@ -20,6 +21,7 @@ CREATE TABLE user_profiles (
 
 
 CREATE TABLE exams (
+  exam_type ENUM('academic','general') NOT NULL DEFAULT 'academic',
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   code VARCHAR(50) NOT NULL,
   title VARCHAR(255) NOT NULL,
