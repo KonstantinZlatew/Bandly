@@ -98,14 +98,26 @@ body {
 
 .page-title {
   text-align: center;
-  margin: 16px 0 40px 0;
-  font-size: 28px;
-  font-style: italic;
-  font-family: "Poppins", sans-serif;
-  font-weight: 600;
-  color: #000000;
-  letter-spacing: 0.3px;
+  margin: 20px 0 44px 0;
+  font-size: 30px;
+  /* font-style: italic; */
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 1.7px;
+  position: relative;
 }
+
+.page-title::after {
+  content: "";
+  display: block;
+  width: 140px;
+  height: 3px;
+  background: #c40000;
+  margin: 10px auto 0 auto;
+  border-radius: 999px;
+}
+
 
 .card-grid {
   display: grid;
