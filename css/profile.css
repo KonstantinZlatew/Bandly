@@ -184,3 +184,19 @@
       grid-template-columns: 1fr;
     }
   }
+
+
+  .input {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+  
+  .input:focus {
+    outline: none;
+    border-color: #c40000;
+  }
+  
