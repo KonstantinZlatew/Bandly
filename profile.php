@@ -69,12 +69,12 @@ $bg = $colors[$userId % count($colors)];
         <button class="btn-dark" id="saveBtn" type="button" style="display:none;">Save changes</button>
         <button class="btn-outline" id="cancelBtn" type="button" style="display:none;">Cancel</button>
 
-        <button class="btn-dark" type="button">Change profile picture</button>
-        <button class="btn-danger" type="button">Logout</button>
+        <button class="btn-dark" id="changePicBtn" type="button" disabled>Change profile picture</button>
+        <button class="btn-danger" id="logoutBtn" type="button" disabled>Logout</button>
       </div>
 
       <div class="profile-note">
-        Tip: later we can add upload + cropping, and save the URL in <b>user_profiles</b>.
+        Preferences are UI-only for now.
       </div>
     </section>
 
@@ -118,28 +118,26 @@ $bg = $colors[$userId % count($colors)];
       </div>
 
       <h2 class="section-title">Preferences</h2>
-
-        <div class="prefs-row">
+      <div class="prefs-row">
         <div class="pref-box">
-            <div class="label">Theme</div>
-            <div class="value">Light</div>
+          <div class="label">Theme</div>
+          <div class="value">Light</div>
         </div>
 
         <div class="pref-box">
-            <div class="label">Notifications</div>
-            <div class="value">Enabled</div>
+          <div class="label">Notifications</div>
+          <div class="value">Enabled</div>
         </div>
 
         <div class="pref-box">
-            <div class="label">Default exam</div>
-            <div class="value">Academic</div>
+          <div class="label">Default exam</div>
+          <div class="value">Academic</div>
         </div>
-    </div>
+      </div>
     </section>
 
   </div>
 </main>
-
 
 <script src="scripts/profile-get.js"></script>
 <script src="scripts/profile-update.js"></script>

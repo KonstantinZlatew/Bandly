@@ -199,4 +199,24 @@
     outline: none;
     border-color: #c40000;
   }
+
+  .message {
+    margin-bottom: 15px;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: none;
+  }
+
+  .message.error {
+    background: #ffe5e5;
+    color: #a10000;
+    border: 1px solid #c40000;
+  }
+
+  .message.success {
+    background: #e6f4ea;
+    color: #1e6b3a;
+    border: 1px solid #2e8b57;
+  }
   

@@ -14,6 +14,8 @@ const els = {
   
     msg: document.getElementById("profileMsg"),
   };
+
+  let lastUser = null;
   
   document.addEventListener("DOMContentLoaded", () => {
     loadProfile();
@@ -34,6 +36,7 @@ const els = {
         throw new Error(data.error || `Failed to load profile (${res.status})`);
       }
   
+      lastUser = data.user;
       renderProfile(data.user);
     } catch (err) {
       showMsg(err.message);
@@ -90,9 +93,10 @@ const els = {
     el.textContent = text;
   }
   
-  function showMsg(text) {
+  function showMsg(text, isError = true) {
     if (!els.msg) return;
     els.msg.textContent = text;
+    els.msg.className = isError ? "message error" : "message success";
     els.msg.style.display = "block";
   }
   
@@ -100,4 +104,12 @@ const els = {
     if (!els.msg) return;
     els.msg.style.display = "none";
   }
+
+  // Expose ProfileUI object for profile-update.js
+  window.ProfileUI = {
+    loadProfile,
+    showMsg,
+    hideMsg,
+    getLastUser: () => lastUser,
+  };
   
