@@ -46,8 +46,8 @@ form.addEventListener("submit", async function (e) {
       throw new Error(data.error || `Request failed (${res.status})`);
     }
 
-    showMessage(data.message || "Account created successfully!", "success");
-    form.reset();
+    // Redirect to homepage after successful signup
+    window.location.href = "index.php";
   } catch (err) {
     showMessage(err.message, "error");
   }

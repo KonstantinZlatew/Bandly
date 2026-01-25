@@ -5,6 +5,8 @@ header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
 
+session_start();
+
 if (!function_exists('db')) {
     throw new RuntimeException("Database function 'db' not found. Check config/db.php");
 }
@@ -95,7 +97,23 @@ try {
     $stmt = $pdo->prepare("INSERT INTO user_profiles (user_id) VALUES (:uid)");
     $stmt->execute(["uid" => $userId]);
 
-    json_response(201, ["ok" => true, "message" => "Account created successfully."]);
+    // Create session with the newly created user data
+    session_regenerate_id(true);
+    $_SESSION["user_id"] = $userId;
+    $_SESSION["username"] = $username;
+    $_SESSION["email"] = $email;
+    $_SESSION["is_admin"] = 0; // New users are not admin by default
+
+    json_response(201, [
+        "ok" => true,
+        "message" => "Account created successfully.",
+        "user" => [
+            "id" => $userId,
+            "username" => $username,
+            "email" => $email,
+            "is_admin" => false
+        ]
+    ]);
 } catch (PDOException $e) {
     if (($e->errorInfo[1] ?? null) === 1062) {
         json_response(409, ["ok" => false, "error" => "Email or username already exists."]);

@@ -37,9 +37,8 @@ form.addEventListener("submit", async function (e) {
       throw new Error(data.error || `Login failed (${res.status})`);
     }
 
-    showMessage(data.message || "Logged in!", "success");
-
-    console.log("Logged user:", data.user);
+    // Redirect to homepage on successful login
+    window.location.href = "index.php";
 
   } catch (err) {
     showMessage(err.message, "error");
