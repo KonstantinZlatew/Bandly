@@ -2,7 +2,7 @@ CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(100) NOT NULL UNIQUE,
   email VARCHAR(255) DEFAULT NULL,
-  password_hash VARCHAR(255) DEFAULT NULL, -- Ако решиш да добавиш парола по-късно
+  password_hash VARCHAR(255) DEFAULT NULL,
   is_admin TINYINT(1) DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   last_login TIMESTAMP NULL
@@ -73,7 +73,7 @@ CREATE TABLE writing_submissions (
   content TEXT NOT NULL,
   word_count INT NULL,
   submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  file_id BIGINT UNSIGNED NULL, -- ако имаш attachment
+  file_id BIGINT UNSIGNED NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (exam_variant_id) REFERENCES exam_variants(id) ON DELETE CASCADE,
   FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
