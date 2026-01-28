@@ -97,6 +97,10 @@ try {
     $stmt = $pdo->prepare("INSERT INTO user_profiles (user_id) VALUES (:uid)");
     $stmt->execute(["uid" => $userId]);
 
+    // Create default entitlements for new user
+    $stmt = $pdo->prepare("INSERT INTO user_entitlements (user_id, credits_balance) VALUES (:uid, 0)");
+    $stmt->execute(["uid" => $userId]);
+
     // Create session with the newly created user data
     session_regenerate_id(true);
     $_SESSION["user_id"] = $userId;

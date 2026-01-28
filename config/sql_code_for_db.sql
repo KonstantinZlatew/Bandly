@@ -143,7 +143,7 @@ CREATE TABLE plans (
   code VARCHAR(50) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL,
   plan_type ENUM('credits','subscription') NOT NULL,
-  credits_amount INT UNSIGNED DEFAULT NULL,
+  credits_amount INT UNSIGNED DEFAULT 1,
   duration_days INT UNSIGNED DEFAULT NULL,
   price_cents INT UNSIGNED NOT NULL,
   currency CHAR(3) NOT NULL DEFAULT 'EUR',
