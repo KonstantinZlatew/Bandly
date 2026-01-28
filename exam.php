@@ -48,6 +48,8 @@ $bg = $colors[$userId % count($colors)];
   </a>
 </header>
 
+<?php require_once __DIR__ . "/includes/entitlements-display.php"; ?>
+
 <main class="container">
   <div class="page-title"><?php echo htmlspecialchars($title); ?> — choose a section</div>
 

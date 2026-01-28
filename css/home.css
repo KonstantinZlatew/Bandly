@@ -12,6 +12,40 @@ body {
   background: #f5f5f5;
 }
 
+/* ===== ENTITLEMENTS BAR ===== */
+.entitlements-bar {
+  background: #fff;
+  border-bottom: 2px solid #eee;
+  padding: 12px 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.entitlement-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.entitlement-item.subscription {
+  color: #2e8b57;
+}
+
+.entitlement-item.credits {
+  color: #5b86d6;
+}
+
+.entitlement-label {
+  font-weight: 600;
+}
+
+.entitlement-value {
+  font-weight: 700;
+}
+
 /* ===== NAVBAR ===== */
 .topbar {
   display: flex;
@@ -256,4 +290,5 @@ body {
   .brand { font-size: 24px; }
   .page-title { font-size: 18px; }
   .mode-card { padding: 40px; min-height: 240px; }
+  .entitlements-bar { padding: 10px 16px; font-size: 12px; }
 }
