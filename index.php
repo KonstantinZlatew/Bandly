@@ -1,13 +1,14 @@
 <?php
-session_start();
-if (!isset($_SESSION["user_id"])) {
+require_once __DIR__ . "/config/auth.php";
+
+if (!isAuthenticated()) {
   header("Location: login.html");
   exit;
 }
 
-$userId = (int)($_SESSION["user_id"] ?? 0);
-$username = (string)($_SESSION["username"] ?? "User");
-$profilePic = $_SESSION["profile_picture_url"] ?? null;
+$userId = getUserId() ?? 0;
+$username = getUsername() ?? "User";
+$profilePic = getProfilePictureUrl();
 
 $initial = strtoupper(mb_substr($username, 0, 1, "UTF-8"));
 $colors = ["#d45a6a", "#5b86d6", "#2e8b57", "#0f766e", "#6b21a8", "#b45309", "#111111"];

@@ -4,7 +4,7 @@ declare(strict_types=1);
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
-session_start();
+require_once __DIR__ . "/../config/auth.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -12,11 +12,14 @@ function json_response(int $code, array $payload): void {
     exit;
 }
 
-if (!isset($_SESSION["user_id"])) {
+if (!isAuthenticated()) {
     json_response(401, ["ok" => false, "error" => "Not authenticated"]);
 }
 
-$userId = (int)$_SESSION["user_id"];
+$userId = getUserId();
+if ($userId === null) {
+    json_response(401, ["ok" => false, "error" => "Not authenticated"]);
+}
 
 try {
     $pdo = db();
@@ -89,4 +92,5 @@ try {
 } catch (PDOException $e) {
     json_response(500, ["ok" => false, "error" => "Server error"]);
 }
+
 

@@ -6,8 +6,7 @@ header("Content-Type: application/json; charset=utf-8");
 error_reporting(E_ALL);
 
 require_once __DIR__ . "/../config/db.php";
-
-session_start();
+require_once __DIR__ . "/../config/auth.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -62,12 +61,13 @@ try {
         $upd->execute(["h" => $newHash, "id" => $user["id"]]);
     }
 
-    // Create session
-    session_regenerate_id(true);
-    $_SESSION["user_id"] = (int)$user["id"];
-    $_SESSION["username"] = (string)$user["username"];
-    $_SESSION["email"] = (string)$user["email"];
-    $_SESSION["is_admin"] = (int)$user["is_admin"];
+    // Set authentication cookies
+    setUserCookies(
+        (int)$user["id"],
+        (string)$user["username"],
+        (string)$user["email"],
+        (int)$user["is_admin"]
+    );
 
     // Update last_login (optional)
     $upd = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = :id");
