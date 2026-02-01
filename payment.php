@@ -1,6 +1,7 @@
 <?php
-session_start();
-if (!isset($_SESSION["user_id"])) {
+require_once __DIR__ . "/config/auth.php";
+
+if (!isAuthenticated()) {
     header("Location: login.html");
     exit;
 }

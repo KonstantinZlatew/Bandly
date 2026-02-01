@@ -4,7 +4,7 @@ declare(strict_types=1);
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
-session_start();
+require_once __DIR__ . "/../config/auth.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -16,11 +16,14 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     json_response(405, ["ok" => false, "error" => "Method not allowed"]);
 }
 
-if (!isset($_SESSION["user_id"])) {
+if (!isAuthenticated()) {
     json_response(401, ["ok" => false, "error" => "Not authenticated"]);
 }
 
-$userId = (int)$_SESSION["user_id"];
+$userId = getUserId();
+if ($userId === null) {
+    json_response(401, ["ok" => false, "error" => "Not authenticated"]);
+}
 
 if (!isset($_FILES["profile_picture"]) || $_FILES["profile_picture"]["error"] !== UPLOAD_ERR_OK) {
     json_response(400, ["ok" => false, "error" => "No file uploaded or upload error occurred"]);
@@ -87,7 +90,8 @@ try {
     $stmt = $pdo->prepare("UPDATE user_profiles SET profile_picture_url = :url WHERE user_id = :id");
     $stmt->execute(["url" => $url, "id" => $userId]);
     
-    $_SESSION["profile_picture_url"] = $url;
+    // Update cookie with new profile picture URL
+    updateUserCookie('profile_picture_url', $url);
     
     json_response(200, ["ok" => true, "url" => $url, "message" => "Profile picture updated successfully."]);
 } catch (PDOException $e) {

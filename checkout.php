@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-session_start();
+require_once __DIR__ . "/config/auth.php";
 
-if (!isset($_SESSION["user_id"])) {
+if (!isAuthenticated()) {
     header("Location: login.html");
     exit;
 }
@@ -29,7 +29,11 @@ if ($planCode === "") {
     exit("Invalid plan");
 }
 
-$userId = (int)$_SESSION["user_id"];
+$userId = getUserId();
+if ($userId === null) {
+    header("Location: login.html");
+    exit;
+}
 
 try {
     $pdo = db();

@@ -2,13 +2,18 @@
 // This file should be included in pages to display user entitlements
 // It fetches entitlements and displays them
 
-if (!isset($_SESSION["user_id"])) {
+require_once __DIR__ . "/../config/auth.php";
+
+if (!isAuthenticated()) {
     return;
 }
 
 require_once __DIR__ . "/../config/db.php";
 
-$userId = (int)$_SESSION["user_id"];
+$userId = getUserId();
+if ($userId === null) {
+    return;
+}
 
 try {
     // #region agent log

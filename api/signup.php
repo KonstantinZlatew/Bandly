@@ -4,8 +4,7 @@ declare(strict_types=1);
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
-
-session_start();
+require_once __DIR__ . "/../config/auth.php";
 
 if (!function_exists('db')) {
     throw new RuntimeException("Database function 'db' not found. Check config/db.php");
@@ -101,12 +100,8 @@ try {
     $stmt = $pdo->prepare("INSERT INTO user_entitlements (user_id, credits_balance) VALUES (:uid, 0)");
     $stmt->execute(["uid" => $userId]);
 
-    // Create session with the newly created user data
-    session_regenerate_id(true);
-    $_SESSION["user_id"] = $userId;
-    $_SESSION["username"] = $username;
-    $_SESSION["email"] = $email;
-    $_SESSION["is_admin"] = 0; // New users are not admin by default
+    // Set authentication cookies
+    setUserCookies($userId, $username, $email, 0);
 
     json_response(201, [
         "ok" => true,

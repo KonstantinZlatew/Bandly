@@ -4,7 +4,7 @@ declare(strict_types=1);
 header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
-session_start();
+require_once __DIR__ . "/../config/auth.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -16,11 +16,14 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     json_response(405, ["ok" => false, "error" => "Method not allowed"]);
 }
 
-if (!isset($_SESSION["user_id"])) {
+if (!isAuthenticated()) {
     json_response(401, ["ok" => false, "error" => "Not authenticated"]);
 }
 
-$userId = (int)$_SESSION["user_id"];
+$userId = getUserId();
+if ($userId === null) {
+    json_response(401, ["ok" => false, "error" => "Not authenticated"]);
+}
 
 
 $raw = file_get_contents("php://input");
@@ -87,9 +90,9 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
 
-            // keep session consistent
-            if (isset($params["username"])) $_SESSION["username"] = $params["username"];
-            if (isset($params["email"])) $_SESSION["email"] = $params["email"];
+            // Update cookies to keep them consistent
+            if (isset($params["username"])) updateUserCookie('username', $params["username"]);
+            if (isset($params["email"])) updateUserCookie('email', $params["email"]);
         }
     }
 
