@@ -49,8 +49,9 @@ try {
                 $currency = strtoupper($plan["currency"] ?? "EUR");
                 $planType = $plan["plan_type"];
                 ?>
-                <form action="checkout.php" method="POST" style="display: contents;">
-                    <button type="submit" name="plan" value="<?php echo htmlspecialchars($plan["code"]); ?>" class="mode-card" style="cursor: pointer; border: none; text-align: left;">
+                <form action="checkout.php" method="POST" class="plan-form" data-plan-code="<?php echo htmlspecialchars($plan["code"]); ?>" style="display: contents;">
+                    <input type="hidden" name="plan" value="<?php echo htmlspecialchars($plan["code"]); ?>">
+                    <button type="submit" class="mode-card" style="cursor: pointer; border: none; text-align: left;">
                         <h2><?php echo htmlspecialchars($plan["name"]); ?></h2>
                         <p>
                             <?php if ($planType === "credits"): ?>
@@ -67,5 +68,23 @@ try {
             <?php endforeach; ?>
         </div>
     </main>
+
+    <!-- Subscription Warning Popup -->
+    <div id="subscriptionPopup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <h2 class="popup-title">Already Subscribed</h2>
+            <p class="popup-message" id="popupMessage">You already have an active subscription. Are you sure you want to purchase another plan?</p>
+            <div class="popup-buttons">
+                <button type="button" id="popupCancel" class="btn-popup btn-cancel">Cancel</button>
+                <button type="button" id="popupIgnore" class="btn-popup btn-ignore">Ignore</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @import "css/payment.css";
+    </style>
+
+    <script src="scripts/payment.js"></script>
 </body>
 </html>
