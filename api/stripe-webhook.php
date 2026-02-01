@@ -97,7 +97,15 @@ function handleCheckoutSessionCompleted($session) {
             $planCode = $metadata["plan_code"] ?? "";
         }
         $checkoutSessionId = $session->id;
-        $paymentIntentId = is_object($session->payment_intent) ? $session->payment_intent->id : $session->payment_intent;
+        // Handle payment_intent - it can be a string ID, an object, or null
+        $paymentIntentId = null;
+        if (isset($session->payment_intent)) {
+            if (is_object($session->payment_intent)) {
+                $paymentIntentId = $session->payment_intent->id ?? null;
+            } else {
+                $paymentIntentId = (string)$session->payment_intent;
+            }
+        }
         $amountCents = (int)$session->amount_total;
         $currency = strtoupper($session->currency ?? "EUR");
         $status = ($session->payment_status === "paid") ? "paid" : "pending";
@@ -210,13 +218,13 @@ function handleCheckoutSessionCompleted($session) {
             
             $stmt = $pdo->prepare("
                 INSERT INTO user_entitlements (user_id, unlimited_until)
-                VALUES (:user_id, :until_new)
-                ON DUPLICATE KEY UPDATE unlimited_until = GREATEST(COALESCE(unlimited_until, '1970-01-01'), :until_cmp)
+                VALUES (:user_id, :until_date)
+                ON DUPLICATE KEY UPDATE unlimited_until = GREATEST(COALESCE(unlimited_until, '1970-01-01'), :until_date_update)
             ");
             $stmt->execute([
                 "user_id" => $userId,
-                "until_new" => $unlimitedUntil,
-                "until_cmp" => $unlimitedUntil
+                "until_date" => $unlimitedUntil,
+                "until_date_update" => $unlimitedUntil
             ]);
 
             // Create or update subscription record
@@ -226,19 +234,19 @@ function handleCheckoutSessionCompleted($session) {
                     status, current_period_start, current_period_end
                 ) VALUES (
                     :user_id, :plan_id, 'stripe', :subscription_id,
-                    'active', NOW(), :period_end_new
+                    'active', NOW(), :period_end
                 )
                 ON DUPLICATE KEY UPDATE
                     status = 'active',
-                    current_period_end = :period_end_upd,
+                    current_period_end = :period_end_update,
                     updated_at = NOW()
             ");
-                $stmt->execute([
+            $stmt->execute([
                 "user_id" => $userId,
                 "plan_id" => $planId,
                 "subscription_id" => $checkoutSessionId,
-                "period_end_new" => $unlimitedUntil,
-                "period_end_upd" => $unlimitedUntil
+                "period_end" => $unlimitedUntil,
+                "period_end_update" => $unlimitedUntil
             ]);
 
         }

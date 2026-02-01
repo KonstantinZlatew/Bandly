@@ -13,7 +13,8 @@ function setAuthCookie(string $name, string $value, int $expire = 604800): void 
     $expireTime = time() + $expire;
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     $httponly = true;
-    $samesite = 'Strict';
+    // Use 'Lax' instead of 'Strict' to allow cookies on redirects from external sites (like Stripe)
+    $samesite = 'Lax';
     
     // PHP 7.3+ supports SameSite attribute
     if (PHP_VERSION_ID >= 70300) {
@@ -54,7 +55,7 @@ function deleteAuthCookie(string $name): void {
             'domain' => '',
             'secure' => $secure,
             'httponly' => true,
-            'samesite' => 'Strict'
+            'samesite' => 'Lax'
         ]);
     } else {
         setcookie($name, '', time() - 3600, '/', '', $secure, true);
