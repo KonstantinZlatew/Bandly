@@ -153,6 +153,111 @@
   margin: 8px 0;
 }
 
+/* Analysis Results Styles */
+.analysis-result {
+  color: #333;
+}
+
+.score-section {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #eee;
+}
+
+.score-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #5b86d6;
+}
+
+.band-score {
+  font-size: 36px;
+  font-weight: 700;
+  color: #5b86d6;
+  text-align: center;
+  padding: 15px;
+  background: #f0f7ff;
+  border-radius: 8px;
+}
+
+.criteria-scores {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.score-item {
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.score-item strong {
+  color: #5b86d6;
+  margin-right: 5px;
+}
+
+.notes-section,
+.comment-section,
+.improvement-section {
+  margin-bottom: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.notes-section h3,
+.comment-section h3,
+.improvement-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.notes-section p,
+.comment-section p {
+  margin: 8px 0;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.improvement-section ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.improvement-section li {
+  margin: 8px 0;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.processing-message {
+  text-align: center;
+  padding: 30px;
+  color: #5b86d6;
+  font-size: 16px;
+}
+
+.processing-message p {
+  margin: 0;
+}
+
+.error-message {
+  padding: 20px;
+  background: #fee;
+  border-left: 4px solid #dc3545;
+  border-radius: 4px;
+  color: #721c24;
+}
+
+.error-message p {
+  margin: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .practice-layout {

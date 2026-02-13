@@ -252,7 +252,107 @@ if (removeImage) {
   });
 }
 
-// Analyze button - save submission and mark as completed
+// Poll for submission status
+let pollInterval = null;
+
+function pollSubmissionStatus(submissionId) {
+  return fetch(`api/essay-status.php?id=${submissionId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data.ok) {
+        throw new Error(data.error || 'Failed to check status');
+      }
+      return data.submission;
+    });
+}
+
+function displayAnalysisResult(result) {
+  const resultsContent = document.getElementById('resultsContent');
+  
+  if (!result) {
+    resultsContent.innerHTML = '<div class="results-placeholder"><p>No results available</p></div>';
+    return;
+  }
+  
+  let html = '<div class="analysis-result">';
+  
+  // Overall Band Score
+  html += `<div class="score-section">
+    <h3>Overall Band Score</h3>
+    <div class="band-score">${result.overall_band || 'N/A'}</div>
+  </div>`;
+  
+  // Individual Scores
+  html += '<div class="criteria-scores">';
+  html += `<div class="score-item"><strong>TR:</strong> ${result.TR || 'N/A'}</div>`;
+  html += `<div class="score-item"><strong>CC:</strong> ${result.CC || 'N/A'}</div>`;
+  html += `<div class="score-item"><strong>LR:</strong> ${result.LR || 'N/A'}</div>`;
+  html += `<div class="score-item"><strong>GRA:</strong> ${result.GRA || 'N/A'}</div>`;
+  html += '</div>';
+  
+  // Notes
+  if (result.notes) {
+    html += '<div class="notes-section"><h3>Notes</h3>';
+    if (result.notes.TR) html += `<p><strong>TR:</strong> ${result.notes.TR}</p>`;
+    if (result.notes.CC) html += `<p><strong>CC:</strong> ${result.notes.CC}</p>`;
+    if (result.notes.LR) html += `<p><strong>LR:</strong> ${result.notes.LR}</p>`;
+    if (result.notes.GRA) html += `<p><strong>GRA:</strong> ${result.notes.GRA}</p>`;
+    html += '</div>';
+  }
+  
+  // Overall Comment
+  if (result.overall_comment) {
+    html += `<div class="comment-section"><h3>Overall Comment</h3><p>${result.overall_comment}</p></div>`;
+  }
+  
+  // Improvement Plan
+  if (result.improvement_plan && Array.isArray(result.improvement_plan)) {
+    html += '<div class="improvement-section"><h3>Improvement Plan</h3><ul>';
+    result.improvement_plan.forEach(item => {
+      html += `<li>${item}</li>`;
+    });
+    html += '</ul></div>';
+  }
+  
+  html += '</div>';
+  resultsContent.innerHTML = html;
+}
+
+function startPolling(submissionId) {
+  // Clear any existing polling
+  if (pollInterval) {
+    clearInterval(pollInterval);
+  }
+  
+  // Poll every 2 seconds
+  pollInterval = setInterval(async () => {
+    try {
+      const submission = await pollSubmissionStatus(submissionId);
+      
+      if (submission.status === 'done') {
+        clearInterval(pollInterval);
+        pollInterval = null;
+        displayAnalysisResult(submission.analysis_result);
+        document.getElementById('analyzeBtn').disabled = false;
+        document.getElementById('analyzeBtn').textContent = 'Analyze';
+      } else if (submission.status === 'failed') {
+        clearInterval(pollInterval);
+        pollInterval = null;
+        document.getElementById('resultsContent').innerHTML = 
+          `<div class="error-message"><p>Analysis failed: ${submission.error_message || 'Unknown error'}</p></div>`;
+        document.getElementById('analyzeBtn').disabled = false;
+        document.getElementById('analyzeBtn').textContent = 'Analyze';
+      } else if (submission.status === 'processing') {
+        document.getElementById('resultsContent').innerHTML = 
+          '<div class="processing-message"><p>Processing your essay... Please wait.</p></div>';
+      }
+    } catch (error) {
+      console.error('Polling error:', error);
+    }
+  }, 2000);
+}
+
+// Analyze button - save submission and start polling
 document.getElementById('analyzeBtn').addEventListener('click', async function() {
   const taskId = document.getElementById('taskId')?.value;
   const taskType = document.getElementById('taskType')?.value;
@@ -273,7 +373,11 @@ document.getElementById('analyzeBtn').addEventListener('click', async function()
   // Disable button and show loading
   const btn = this;
   btn.disabled = true;
-  btn.textContent = 'Analyzing...';
+  btn.textContent = 'Submitting...';
+  
+  // Show pending message
+  document.getElementById('resultsContent').innerHTML = 
+    '<div class="processing-message"><p>Submitting your essay...</p></div>';
   
   try {
     // Prepare form data
@@ -297,20 +401,24 @@ document.getElementById('analyzeBtn').addEventListener('click', async function()
     
     const result = await response.json();
     
-    if (result.ok) {
-      // Show success message
-      alert('Submission saved successfully! Analysis will be performed.');
-      // Optionally reload to get a new task
-      // window.location.reload();
+    if (result.ok && result.submission_id) {
+      // Start polling for status
+      btn.textContent = 'Analyzing...';
+      startPolling(result.submission_id);
     } else {
       alert('Error saving submission: ' + (result.error || 'Unknown error'));
+      btn.disabled = false;
+      btn.textContent = 'Analyze';
+      document.getElementById('resultsContent').innerHTML = 
+        '<div class="results-placeholder"><p>-</p><p>-</p><p>-</p></div>';
     }
   } catch (error) {
     console.error('Error:', error);
     alert('Error saving submission. Please try again.');
-  } finally {
     btn.disabled = false;
     btn.textContent = 'Analyze';
+    document.getElementById('resultsContent').innerHTML = 
+      '<div class="results-placeholder"><p>-</p><p>-</p><p>-</p></div>';
   }
 });
 </script>

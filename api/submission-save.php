@@ -115,7 +115,7 @@ try {
     $pdo->beginTransaction();
     
     try {
-        // Insert into writing_submissions
+        // Insert into writing_submissions with status='pending'
         $stmt = $pdo->prepare("
             INSERT INTO writing_submissions (
                 user_id,
@@ -125,8 +125,9 @@ try {
                 word_count,
                 task_prompt,
                 task_type,
-                image_file_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                image_file_id,
+                status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
         ");
         $stmt->execute([
             $userId,
