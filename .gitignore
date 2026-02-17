@@ -12,3 +12,9 @@
 *.log
 
 test.php
+
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc

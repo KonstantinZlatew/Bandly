@@ -258,6 +258,55 @@
   margin: 0;
 }
 
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.status-processing {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-badge.status-done {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-badge.status-failed {
+  background: #f8d7da;
+  color: #842029;
+}
+
+/* Submission Detail Page */
+.submission-meta {
+  font-size: 14px;
+  color: #666;
+  margin-top: 10px;
+}
+
+.essay-display {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  min-height: 200px;
+  line-height: 1.8;
+  color: #444;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .practice-layout {
