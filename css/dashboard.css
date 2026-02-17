@@ -1,0 +1,172 @@
+/* Dashboard Styles */
+
+.dashboard-section {
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 2px solid #eee;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* Chart Container */
+.chart-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 400px;
+}
+
+/* Submissions Table */
+.submissions-table-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+}
+
+.submissions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.submissions-table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.submissions-table th {
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.submissions-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid #eee;
+  color: #555;
+}
+
+.submissions-table tbody tr {
+  transition: background-color 0.2s;
+}
+
+.submissions-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.score-cell {
+  font-weight: 600;
+}
+
+.band-score {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #5b86d6;
+  color: white;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.status-processing {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-badge.status-done {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status-badge.status-failed {
+  background: #f8d7da;
+  color: #842029;
+}
+
+.no-submissions {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.no-submissions p {
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.no-submissions p:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .submissions-table {
+    font-size: 12px;
+  }
+  
+  .submissions-table th,
+  .submissions-table td {
+    padding: 10px 8px;
+  }
+  
+  .chart-container {
+    height: 300px;
+    padding: 15px;
+  }
+  
+  .dashboard-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .submissions-table-container {
+    padding: 15px;
+  }
+  
+  .submissions-table {
+    font-size: 11px;
+  }
+  
+  .submissions-table th,
+  .submissions-table td {
+    padding: 8px 6px;
+  }
+  
+  .band-score {
+    font-size: 14px;
+    padding: 4px 8px;
+  }
+}

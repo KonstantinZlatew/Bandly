@@ -32,13 +32,13 @@ def retrieve_rubric_context(task_type: str, k: int = 8) -> str:
             where={"task_type": task_type}
         )
 
-        print("RAG context length:", len(rubric_context))
-
         docs = res.get("documents", [[]])[0]
         if not docs:
             return ""
 
-        return "\n\n".join(docs)
+        rubric_context = "\n\n".join(docs)
+        print("RAG context length:", len(rubric_context))
+        return rubric_context
 
     except Exception:
         return ""
