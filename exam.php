@@ -10,13 +10,6 @@ $type = $_GET["type"] ?? "academic";
 if ($type !== "academic" && $type !== "general") $type = "academic";
 $title = ($type === "general") ? "IELTS General" : "IELTS Academic";
 
-$userId = getUserId() ?? 0;
-$username = getUsername() ?? "User";
-$profilePic = getProfilePictureUrl();
-
-$initial = strtoupper(mb_substr($username, 0, 1, "UTF-8"));
-$colors = ["#d45a6a", "#5b86d6", "#2e8b57", "#0f766e", "#6b21a8", "#b45309", "#111111"];
-$bg = $colors[$userId % count($colors)];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,26 +21,7 @@ $bg = $colors[$userId % count($colors)];
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-left">
-    <a class="back-btn" href="index.php">← Back</a>
-    <div class="hello"><span class="name"><?php echo htmlspecialchars($username); ?></span></div>
-  </div>
-
-  <div class="topbar-center">
-    <h1 class="brand">IELTSEVALAI</h1>
-  </div>
-
-  <a class="avatar-link" href="profile.php" title="Profile">
-    <?php if ($profilePic): ?>
-      <img class="avatar" src="<?php echo htmlspecialchars($profilePic); ?>" alt="Profile picture">
-    <?php else: ?>
-      <div class="avatar-fallback" style="background: <?php echo htmlspecialchars($bg); ?>;">
-        <?php echo htmlspecialchars($initial); ?>
-      </div>
-    <?php endif; ?>
-  </a>
-</header>
+<?php require_once __DIR__ . "/includes/navbar.php"; ?>
 
 <?php require_once __DIR__ . "/includes/entitlements-display.php"; ?>
 

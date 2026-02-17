@@ -27,15 +27,7 @@ try {
     <link rel="stylesheet" href="css/home.css">
 </head>
 <body>
-    <header class="topbar">
-        <div class="topbar-left">
-            <a class="back-btn" href="index.php">← Back</a>
-        </div>
-        <div class="topbar-center">
-            <h1 class="brand">IELTSEVALAI</h1>
-        </div>
-        <div class="topbar-right"></div>
-    </header>
+    <?php require_once __DIR__ . "/includes/navbar.php"; ?>
 
     <?php require_once __DIR__ . "/includes/entitlements-display.php"; ?>
 
