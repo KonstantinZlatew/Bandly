@@ -1,9 +1,4 @@
--- =====================================================
--- Async Processing Schema Updates
--- =====================================================
--- Adds status tracking and analysis result storage
--- for asynchronous essay processing
--- =====================================================
+
 
 -- 1. Add status and analysis fields to writing_submissions
 ALTER TABLE writing_submissions

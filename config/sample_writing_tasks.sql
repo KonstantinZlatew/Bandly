@@ -1,10 +1,3 @@
--- =====================================================
--- Sample IELTS Writing Tasks Data
--- =====================================================
--- This SQL file inserts sample writing tasks for
--- Academic and General Training Task 1 and Task 2
--- =====================================================
-
 -- Insert Academic Exam
 INSERT INTO exams (exam_type, code, title, description, created_by)
 VALUES (
@@ -337,17 +330,3 @@ Write at least 250 words.',
   9.00,
   '{"task_category": "discussion_opinion", "word_count_min": 250}'
 );
-
--- =====================================================
--- Summary
--- =====================================================
--- This file inserts:
--- - 2 Exams (Academic and General Training)
--- - 2 Exam Variants (one for each exam)
--- - 4 Academic Task 1 prompts (bar chart, line graph, process, table)
--- - 4 Academic Task 2 prompts (various essay types)
--- - 4 General Training Task 1 prompts (various letter types)
--- - 4 General Training Task 2 prompts (various essay types)
--- 
--- Total: 16 writing tasks
--- =====================================================

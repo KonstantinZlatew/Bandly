@@ -45,21 +45,9 @@ $title = ($type === "general") ? "IELTS General" : "IELTS Academic";
       <div class="badge"><?php echo $type; ?></div>
     </a>
 
-    <a class="section-card" href="practice.php?type=<?php echo $type; ?>&section=speaking&part=1">
-      <h3>Speaking Part 1</h3>
-      <p>Short questions about familiar topics.</p>
-      <div class="badge">speaking</div>
-    </a>
-
-    <a class="section-card" href="practice.php?type=<?php echo $type; ?>&section=speaking&part=2">
+    <a class="section-card" href="speaking-practice.php?type=<?php echo $type; ?>&section=speaking&part=2">
       <h3>Speaking Part 2</h3>
       <p>Cue card (1–2 minute talk).</p>
-      <div class="badge">speaking</div>
-    </a>
-
-    <a class="section-card" href="practice.php?type=<?php echo $type; ?>&section=speaking&part=3">
-      <h3>Speaking Part 3</h3>
-      <p>Deeper discussion related to Part 2.</p>
       <div class="badge">speaking</div>
     </a>
 
