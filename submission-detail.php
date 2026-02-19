@@ -76,7 +76,7 @@ try {
 
 <header class="topbar">
   <div class="topbar-left">
-    <a class="back-btn" href="index.php">← Back</a>
+    <a class="back-btn" href="index.php">←</a>
     <div class="hello"><span class="name"><?php echo htmlspecialchars($username); ?></span></div>
   </div>
 

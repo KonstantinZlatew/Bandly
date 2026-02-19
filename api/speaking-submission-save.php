@@ -161,16 +161,19 @@ try {
                 user_id,
                 exam_variant_id,
                 task_id,
+                task_prompt,
                 audio_url,
                 audio_duration_seconds,
-                file_id
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                file_id,
+                status
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
         ");
         $audioUrl = '/uploads/' . $storageKey; // Relative URL for frontend
         $stmt->execute([
             $userId,
             $examVariantId,
             $taskId,
+            $taskPrompt,
             $audioUrl,
             $audioDurationSeconds,
             $fileId
