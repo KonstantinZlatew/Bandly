@@ -11,9 +11,12 @@ $userId = getUserId() ?? 0;
 
 // Fetch user submissions
 $submissions = [];
+$speakingSubmissions = [];
 $chartData = [];
 try {
   $pdo = db();
+  
+  // Fetch writing submissions
   $stmt = $pdo->prepare("
     SELECT 
       ws.id,
@@ -34,6 +37,26 @@ try {
   ");
   $stmt->execute([$userId]);
   $submissions = $stmt->fetchAll();
+  
+  // Fetch speaking submissions
+  $stmt = $pdo->prepare("
+    SELECT 
+      ss.id,
+      ss.task_prompt,
+      ss.submitted_at,
+      ss.status,
+      ss.analysis_result,
+      t.task_number,
+      e.exam_type
+    FROM speaking_submissions ss
+    JOIN tasks t ON ss.task_id = t.id
+    JOIN exam_variants ev ON ss.exam_variant_id = ev.id
+    JOIN exams e ON ev.exam_id = e.id
+    WHERE ss.user_id = ?
+    ORDER BY ss.submitted_at DESC
+  ");
+  $stmt->execute([$userId]);
+  $speakingSubmissions = $stmt->fetchAll();
   
   // Prepare chart data (only for completed submissions)
   foreach ($submissions as $sub) {
@@ -97,10 +120,11 @@ try {
     </div>
     <?php endif; ?>
     
-    <!-- Submissions Table -->
+    <!-- Writing Submissions Table -->
     <div class="submissions-table-container">
+      <h3 class="table-section-title">Writing Submissions</h3>
       <?php if (count($submissions) > 0): ?>
-        <table class="submissions-table">
+        <table class="submissions-table writing-submissions-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -114,7 +138,9 @@ try {
             </tr>
           </thead>
           <tbody>
-            <?php foreach ($submissions as $sub): 
+            <?php 
+            $writingIndex = 0;
+            foreach ($submissions as $sub): 
               $result = null;
               if ($sub['status'] === 'done' && $sub['analysis_result']) {
                 $result = json_decode($sub['analysis_result'], true);
@@ -123,8 +149,10 @@ try {
               if ($sub['exam_type']) {
                 $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
               }
+              $writingIndex++;
+              $isHidden = $writingIndex > 5 ? 'hidden-row' : '';
             ?>
-            <tr class="submission-row" data-submission-id="<?php echo htmlspecialchars($sub['id']); ?>">
+            <tr class="submission-row writing-row <?php echo $isHidden; ?>" data-submission-id="<?php echo htmlspecialchars($sub['id']); ?>" data-submission-type="writing">
               <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($sub['submitted_at']))); ?></td>
               <td><?php echo htmlspecialchars($taskTypeLabel); ?></td>
               <td class="score-cell">
@@ -149,6 +177,11 @@ try {
             <?php endforeach; ?>
           </tbody>
         </table>
+        <?php if (count($submissions) > 5): ?>
+          <div class="show-more-container" style="text-align: center; margin-top: 16px;">
+            <button class="show-more-btn" data-table="writing">Show More</button>
+          </div>
+        <?php endif; ?>
       <?php else: ?>
         <div class="no-submissions">
           <p>You haven't submitted any essays yet.</p>
@@ -156,6 +189,85 @@ try {
         </div>
       <?php endif; ?>
     </div>
+    
+    <!-- Speaking Submissions Table -->
+    <div class="submissions-table-container" style="margin-top: 32px;">
+      <h3 class="table-section-title">Speaking Submissions</h3>
+      <?php if (count($speakingSubmissions) > 0): ?>
+        <table class="submissions-table speaking-submissions-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Task Type</th>
+              <th>Overall Band</th>
+              <th>FC</th>
+              <th>LR</th>
+              <th>GRA</th>
+              <th>PR</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php 
+            $speakingIndex = 0;
+            foreach ($speakingSubmissions as $sub): 
+              $result = null;
+              if ($sub['status'] === 'done' && $sub['analysis_result']) {
+                $result = json_decode($sub['analysis_result'], true);
+              }
+              $taskTypeLabel = 'Speaking Task';
+              if ($sub['exam_type']) {
+                $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
+              }
+              $speakingIndex++;
+              $isHidden = $speakingIndex > 5 ? 'hidden-row' : '';
+            ?>
+            <tr class="submission-row speaking-row <?php echo $isHidden; ?>" data-submission-id="<?php echo htmlspecialchars($sub['id']); ?>" data-submission-type="speaking">
+              <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($sub['submitted_at']))); ?></td>
+              <td><?php echo htmlspecialchars($taskTypeLabel); ?></td>
+              <td class="score-cell">
+                <?php if ($result && isset($result['overall_band'])): ?>
+                  <span class="band-score"><?php echo htmlspecialchars($result['overall_band']); ?></span>
+                <?php else: ?>
+                  <span class="status-badge status-<?php echo htmlspecialchars($sub['status']); ?>">
+                    <?php echo htmlspecialchars(ucfirst($sub['status'])); ?>
+                  </span>
+                <?php endif; ?>
+              </td>
+              <td><?php echo $result && isset($result['FC']) ? htmlspecialchars($result['FC']) : '-'; ?></td>
+              <td><?php echo $result && isset($result['LR']) ? htmlspecialchars($result['LR']) : '-'; ?></td>
+              <td><?php echo $result && isset($result['GRA']) ? htmlspecialchars($result['GRA']) : '-'; ?></td>
+              <td><?php echo $result && isset($result['PR']) ? htmlspecialchars($result['PR']) : '-'; ?></td>
+              <td>
+                <span class="status-badge status-<?php echo htmlspecialchars($sub['status']); ?>">
+                  <?php echo htmlspecialchars(ucfirst($sub['status'])); ?>
+                </span>
+              </td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+        <?php if (count($speakingSubmissions) > 5): ?>
+          <div class="show-more-container" style="text-align: center; margin-top: 16px;">
+            <button class="show-more-btn" data-table="speaking">Show More</button>
+          </div>
+        <?php endif; ?>
+      <?php else: ?>
+        <div class="no-submissions">
+          <p>You haven't submitted any speaking recordings yet.</p>
+          <p>Start practicing by choosing a mode above!</p>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+  
+  <!-- Plan Purchase Link -->
+  <div style="text-align: center; margin-top: 48px; margin-bottom: 32px;">
+    <a href="payment.php" class="mode-card" style="display: inline-block; text-decoration: none; max-width: 400px;">
+      <h2>See Our Plans</h2>
+      <p>Choose a subscription plan or purchase credits to continue practicing.</p>
+      <div class="accent-line"></div>
+    </a>
   </div>
 </main>
 
@@ -229,6 +341,9 @@ document.querySelectorAll('.submission-row').forEach(row => {
   row.style.cursor = 'pointer';
   row.addEventListener('click', function() {
     const submissionId = this.getAttribute('data-submission-id');
+    const submissionType = this.getAttribute('data-submission-type');
+    // For now, both writing and speaking use the same detail page
+    // If needed, this can be changed to handle speaking separately
     window.location.href = 'submission-detail.php?id=' + submissionId;
   });
   row.addEventListener('mouseenter', function() {
@@ -238,7 +353,61 @@ document.querySelectorAll('.submission-row').forEach(row => {
     this.style.backgroundColor = '';
   });
 });
+
+// Show More/Less functionality
+document.querySelectorAll('.show-more-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const tableType = this.getAttribute('data-table');
+    const rows = document.querySelectorAll(`.${tableType}-row`);
+    const isShowingMore = this.textContent === 'Show Less';
+    
+    if (isShowingMore) {
+      // Hide rows beyond first 5
+      rows.forEach((row, index) => {
+        if (index >= 5) {
+          row.classList.add('hidden-row');
+        }
+      });
+      this.textContent = 'Show More';
+    } else {
+      // Show all rows
+      rows.forEach(row => {
+        row.classList.remove('hidden-row');
+      });
+      this.textContent = 'Show Less';
+    }
+  });
+});
 </script>
+
+<style>
+.hidden-row {
+  display: none;
+}
+
+.table-section-title {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.show-more-btn {
+  background-color: #5b86d6;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.show-more-btn:hover {
+  background-color: #4a6fb8;
+}
+</style>
 
 </body>
 </html>

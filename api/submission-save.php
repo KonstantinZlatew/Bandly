@@ -5,6 +5,8 @@ header("Content-Type: application/json; charset=utf-8");
 
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
+require_once __DIR__ . "/../includes/entitlements-check.php";
+require_once __DIR__ . "/../includes/entitlements-deduct.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -23,6 +25,15 @@ if ($userId === null) {
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     json_response(405, ["ok" => false, "error" => "Method not allowed"]);
+}
+
+// Check entitlements before proceeding
+$entitlementCheck = checkCanAnalyze($userId);
+if (!$entitlementCheck['can_analyze']) {
+    json_response(403, [
+        "ok" => false, 
+        "error" => $entitlementCheck['reason']
+    ]);
 }
 
 try {
@@ -115,6 +126,22 @@ try {
     $pdo->beginTransaction();
     
     try {
+        // Deduct credit if user doesn't have subscription
+        if (!$entitlementCheck['has_subscription']) {
+            $deductResult = deductCreditForAnalysis($userId);
+            if (!$deductResult['success']) {
+                // Rollback and delete uploaded file if it exists
+                $pdo->rollBack();
+                if (isset($uploadPath) && file_exists($uploadPath)) {
+                    unlink($uploadPath);
+                }
+                json_response(402, [
+                    "ok" => false, 
+                    "error" => $deductResult['message']
+                ]);
+            }
+        }
+        
         // Insert into writing_submissions with status='pending'
         $stmt = $pdo->prepare("
             INSERT INTO writing_submissions (
@@ -162,7 +189,8 @@ try {
         json_response(200, [
             "ok" => true,
             "submission_id" => $submissionId,
-            "message" => "Submission saved successfully"
+            "message" => "Submission saved successfully",
+            "credits_remaining" => $entitlementCheck['has_subscription'] ? null : ($entitlementCheck['credits_remaining'] - 1)
         ]);
         
     } catch (Exception $e) {

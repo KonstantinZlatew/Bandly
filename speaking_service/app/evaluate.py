@@ -42,7 +42,7 @@ def transcribe_audio(audio_path: str) -> str:
         transcript = client.audio.transcriptions.create(
             model="whisper-1",
             file=audio_file,
-            language="en"  # Optional: specify language for better accuracy
+            language="en"
         )
     return transcript.text
 
@@ -132,7 +132,7 @@ Return your evaluation as a JSON object with the structure specified above."""
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message}
         ],
-        temperature=0.3,  # Lower temperature for more consistent scoring
+        temperature=0.3,
         response_format={"type": "json_object"}  # Force JSON response
     )
     
