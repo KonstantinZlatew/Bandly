@@ -13,10 +13,8 @@ function setAuthCookie(string $name, string $value, int $expire = 604800): void 
     $expireTime = time() + $expire;
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     $httponly = true;
-    // Use 'Lax' instead of 'Strict' to allow cookies on redirects from external sites (like Stripe)
     $samesite = 'Lax';
     
-    // PHP 7.3+ supports SameSite attribute
     if (PHP_VERSION_ID >= 70300) {
         setcookie($name, $value, [
             'expires' => $expireTime,
