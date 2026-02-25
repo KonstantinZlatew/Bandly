@@ -12,7 +12,8 @@ $userId = getUserId() ?? 0;
 // Fetch user submissions
 $submissions = [];
 $speakingSubmissions = [];
-$chartData = [];
+$writingChartData = [];
+$speakingChartData = [];
 try {
   $pdo = db();
   
@@ -58,12 +59,26 @@ try {
   $stmt->execute([$userId]);
   $speakingSubmissions = $stmt->fetchAll();
   
-  // Prepare chart data (only for completed submissions)
+  // Prepare writing chart data (only for completed submissions)
   foreach ($submissions as $sub) {
     if ($sub['status'] === 'done' && $sub['analysis_result']) {
       $result = json_decode($sub['analysis_result'], true);
       if ($result && isset($result['overall_band'])) {
-        $chartData[] = [
+        $writingChartData[] = [
+          'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
+          'label' => date('M d', strtotime($sub['submitted_at'])),
+          'score' => (float)$result['overall_band']
+        ];
+      }
+    }
+  }
+  
+  // Prepare speaking chart data (only for completed submissions)
+  foreach ($speakingSubmissions as $sub) {
+    if ($sub['status'] === 'done' && $sub['analysis_result']) {
+      $result = json_decode($sub['analysis_result'], true);
+      if ($result && isset($result['overall_band'])) {
+        $speakingChartData[] = [
           'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
           'label' => date('M d', strtotime($sub['submitted_at'])),
           'score' => (float)$result['overall_band']
@@ -113,10 +128,17 @@ try {
   <div class="dashboard-section">
     <h2 class="dashboard-title">My Submissions</h2>
     
-    <?php if (count($chartData) > 0): ?>
-    <!-- Score Chart -->
+    <?php if (count($writingChartData) > 0): ?>
+    <!-- Writing Score Chart -->
     <div class="chart-container">
-      <canvas id="scoreChart"></canvas>
+      <canvas id="writingScoreChart"></canvas>
+    </div>
+    <?php endif; ?>
+    
+    <?php if (count($speakingChartData) > 0): ?>
+    <!-- Speaking Score Chart -->
+    <div class="chart-container" style="margin-top: 32px;">
+      <canvas id="speakingScoreChart"></canvas>
     </div>
     <?php endif; ?>
     
@@ -272,17 +294,17 @@ try {
 </main>
 
 <script>
-// Chart.js configuration
-<?php if (count($chartData) > 0): ?>
-const chartData = <?php echo json_encode($chartData); ?>;
-const ctx = document.getElementById('scoreChart').getContext('2d');
-new Chart(ctx, {
+// Writing Chart.js configuration
+<?php if (count($writingChartData) > 0): ?>
+const writingChartData = <?php echo json_encode($writingChartData); ?>;
+const writingCtx = document.getElementById('writingScoreChart').getContext('2d');
+new Chart(writingCtx, {
   type: 'line',
   data: {
-    labels: chartData.map(d => d.label),
+    labels: writingChartData.map(d => d.label),
     datasets: [{
       label: 'Overall Band Score',
-      data: chartData.map(d => d.score),
+      data: writingChartData.map(d => d.score),
       borderColor: '#5b86d6',
       backgroundColor: 'rgba(91, 134, 214, 0.1)',
       borderWidth: 3,
@@ -305,7 +327,71 @@ new Chart(ctx, {
       },
       title: {
         display: true,
-        text: 'Your IELTS Score Progress',
+        text: 'Your IELTS Writing Score Progress',
+        font: {
+          size: 18,
+          weight: 'bold'
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: false,
+        min: 0,
+        max: 9,
+        ticks: {
+          stepSize: 0.5
+        },
+        title: {
+          display: true,
+          text: 'Overall Band Score'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Submission Date'
+        }
+      }
+    }
+  }
+});
+<?php endif; ?>
+
+// Speaking Chart.js configuration
+<?php if (count($speakingChartData) > 0): ?>
+const speakingChartData = <?php echo json_encode($speakingChartData); ?>;
+const speakingCtx = document.getElementById('speakingScoreChart').getContext('2d');
+new Chart(speakingCtx, {
+  type: 'line',
+  data: {
+    labels: speakingChartData.map(d => d.label),
+    datasets: [{
+      label: 'Overall Band Score',
+      data: speakingChartData.map(d => d.score),
+      borderColor: '#2e8b57',
+      backgroundColor: 'rgba(46, 139, 87, 0.1)',
+      borderWidth: 3,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      pointBackgroundColor: '#2e8b57',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Your IELTS Speaking Score Progress',
         font: {
           size: 18,
           weight: 'bold'
@@ -342,9 +428,12 @@ document.querySelectorAll('.submission-row').forEach(row => {
   row.addEventListener('click', function() {
     const submissionId = this.getAttribute('data-submission-id');
     const submissionType = this.getAttribute('data-submission-type');
-    // For now, both writing and speaking use the same detail page
-    // If needed, this can be changed to handle speaking separately
-    window.location.href = 'submission-detail.php?id=' + submissionId;
+    // Route to appropriate detail page based on submission type
+    if (submissionType === 'speaking') {
+      window.location.href = 'speaking-detail.php?id=' + submissionId;
+    } else {
+      window.location.href = 'submission-detail.php?id=' + submissionId;
+    }
   });
   row.addEventListener('mouseenter', function() {
     this.style.backgroundColor = '#f0f7ff';

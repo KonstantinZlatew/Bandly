@@ -212,9 +212,30 @@ function handleCheckoutSessionCompleted($session) {
             file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id'=>'log_'.time().'_handler7','timestamp'=>time()*1000,'location'=>'stripe-webhook.php:handleCheckoutSessionCompleted:125','message'=>'Credits update result','data'=>['success'=>$creditsResult],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'D'])."\n", FILE_APPEND);
             // #endregion
         } elseif ($plan["plan_type"] === "subscription") {
-            // Set unlimited access until end of subscription period
+            // Check if user already has an active subscription
+            $stmt = $pdo->prepare("
+                SELECT current_period_end 
+                FROM user_subscriptions 
+                WHERE user_id = :user_id 
+                AND status IN ('active', 'trialing')
+                AND (current_period_end IS NULL OR current_period_end > NOW())
+                ORDER BY current_period_end DESC
+                LIMIT 1
+            ");
+            $stmt->execute(["user_id" => $userId]);
+            $existingSubscription = $stmt->fetch();
+            
             $durationDays = (int)$plan["duration_days"];
-            $unlimitedUntil = date('Y-m-d H:i:s', strtotime("+{$durationDays} days"));
+            
+            // If user has an active subscription, extend from the current period_end
+            // Otherwise, start from now
+            if ($existingSubscription && $existingSubscription['current_period_end']) {
+                $currentEnd = new DateTime($existingSubscription['current_period_end']);
+                $currentEnd->modify("+{$durationDays} days");
+                $unlimitedUntil = $currentEnd->format('Y-m-d H:i:s');
+            } else {
+                $unlimitedUntil = date('Y-m-d H:i:s', strtotime("+{$durationDays} days"));
+            }
             
             $stmt = $pdo->prepare("
                 INSERT INTO user_entitlements (user_id, unlimited_until)
@@ -228,26 +249,48 @@ function handleCheckoutSessionCompleted($session) {
             ]);
 
             // Create or update subscription record
-            $stmt = $pdo->prepare("
-                INSERT INTO user_subscriptions (
-                    user_id, plan_id, provider, provider_subscription_id,
-                    status, current_period_start, current_period_end
-                ) VALUES (
-                    :user_id, :plan_id, 'stripe', :subscription_id,
-                    'active', NOW(), :period_end
-                )
-                ON DUPLICATE KEY UPDATE
-                    status = 'active',
-                    current_period_end = :period_end_update,
-                    updated_at = NOW()
-            ");
-            $stmt->execute([
-                "user_id" => $userId,
-                "plan_id" => $planId,
-                "subscription_id" => $checkoutSessionId,
-                "period_end" => $unlimitedUntil,
-                "period_end_update" => $unlimitedUntil
-            ]);
+            // If user has an active subscription, extend it; otherwise create new
+            if ($existingSubscription && $existingSubscription['current_period_end']) {
+                // Update existing active subscription to extend the period
+                $currentEnd = new DateTime($existingSubscription['current_period_end']);
+                $currentEnd->modify("+{$durationDays} days");
+                $newPeriodEnd = $currentEnd->format('Y-m-d H:i:s');
+                
+                $stmt = $pdo->prepare("
+                    UPDATE user_subscriptions 
+                    SET plan_id = :plan_id,
+                        status = 'active',
+                        current_period_end = :period_end,
+                        updated_at = NOW()
+                    WHERE user_id = :user_id 
+                    AND status IN ('active', 'trialing')
+                    AND (current_period_end IS NULL OR current_period_end > NOW())
+                ");
+                $stmt->execute([
+                    "user_id" => $userId,
+                    "plan_id" => $planId,
+                    "period_end" => $newPeriodEnd
+                ]);
+            } else {
+                // Create new subscription record
+                $newPeriodEnd = date('Y-m-d H:i:s', strtotime("+{$durationDays} days"));
+                
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_subscriptions (
+                        user_id, plan_id, provider, provider_subscription_id,
+                        status, current_period_start, current_period_end
+                    ) VALUES (
+                        :user_id, :plan_id, 'stripe', :subscription_id,
+                        'active', NOW(), :period_end
+                    )
+                ");
+                $stmt->execute([
+                    "user_id" => $userId,
+                    "plan_id" => $planId,
+                    "subscription_id" => $checkoutSessionId,
+                    "period_end" => $newPeriodEnd
+                ]);
+            }
 
         }
 
