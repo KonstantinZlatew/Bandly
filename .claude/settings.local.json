@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"C:\\\\xampp\\\\apache\\\\logs\\\\\" | Select-Object Name, LastWriteTime, Length *)"
+    ]
+  }
+}

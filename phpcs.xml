@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<ruleset name="IELTS-AI-Evaluator">
+    <description>Coding standard for IELTS-AI-Evaluator project</description>
+    
+    <!-- Include the whole project -->
+    <file>.</file>
+    
+    <!-- Exclude vendor and other directories -->
+    <exclude-pattern>vendor/*</exclude-pattern>
+    <exclude-pattern>node_modules/*</exclude-pattern>
+    <exclude-pattern>uploads/*</exclude-pattern>
+    <exclude-pattern>*.min.js</exclude-pattern>
+    <exclude-pattern>*.min.css</exclude-pattern>
+    
+    <!-- Use PSR12 coding standard -->
+    <rule ref="PSR12"/>
+    
+    <!-- Show progress -->
+    <arg name="colors"/>
+    <arg name="report" value="full"/>
+    <arg value="p"/>
+    
+    <!-- Ignore warnings for missing docblocks in test files -->
+    <rule ref="Squiz.Commenting.FunctionComment">
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
+</ruleset>
+

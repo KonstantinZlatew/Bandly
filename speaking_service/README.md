@@ -90,3 +90,4 @@ php speaking-worker.php
 - Verify OpenAI API key is valid
 - Check audio file exists in uploads/speaking/ directory
 - Verify file permissions on uploads directory
+

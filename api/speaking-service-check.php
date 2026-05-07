@@ -67,3 +67,4 @@ echo json_encode([
     'checks' => $checks,
     'service_url' => $AI_SERVICE_URL
 ], JSON_PRETTY_PRINT);
+

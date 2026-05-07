@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
+require_once __DIR__ . "/../config/two_factor.php";
 
 function json_response(int $code, array $payload): void {
     http_response_code($code);
@@ -61,29 +62,69 @@ try {
         $upd->execute(["h" => $newHash, "id" => $user["id"]]);
     }
 
-    // Set authentication cookies
-    setUserCookies(
-        (int)$user["id"],
-        (string)$user["username"],
-        (string)$user["email"],
-        (int)$user["is_admin"]
-    );
+    // Send 2FA code instead of directly logging in
+    try {
+        $result = send2FAVerification((int)$user["id"], (string)$user["email"]);
 
-    // Update last_login (optional)
-    $upd = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = :id");
-    $upd->execute(["id" => $user["id"]]);
+        if (!$result['success']) {
+            $errorMsg = $result['error'] ?? "Failed to send verification code.";
+            if (strpos($errorMsg, "two_factor_codes") !== false ||
+                strpos($errorMsg, "does not exist") !== false) {
+                json_response(500, [
+                    "ok" => false,
+                    "error" => "Database setup incomplete. Please run: config/two_factor_auth_schema.sql"
+                ]);
+            } else {
+                json_response(500, ["ok" => false, "error" => $errorMsg]);
+            }
+        }
+    } catch (Exception $e) {
+        error_log("2FA Send Error: " . $e->getMessage());
+        json_response(500, [
+            "ok" => false,
+            "error" => "Failed to send verification code: " . (ini_get('display_errors') ? $e->getMessage() : "Please check server configuration")
+        ]);
+    }
+
+    // Set a short-lived cookie with the user ID so verify-2fa.php knows who is verifying.
+    // Security comes from the 2FA code itself — no one can complete login without it.
+    setcookie('2fa_pending_uid', (string)$user["id"], [
+        'expires'  => time() + 900,
+        'path'     => '/',
+        'domain'   => '',
+        'secure'   => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
 
     json_response(200, [
         "ok" => true,
-        "message" => "Logged in successfully.",
-        "user" => [
-            "id" => (int)$user["id"],
-            "username" => (string)$user["username"],
-            "email" => (string)$user["email"],
-            "is_admin" => (int)$user["is_admin"]
-        ]
+        "message" => "Verification code sent to your email.",
+        "requires_2fa" => true,
+        "email" => (string)$user["email"]
     ]);
 
 } catch (PDOException $e) {
-    json_response(500, ["ok" => false, "error" => "Server error."]);
+    error_log("Login Error: " . $e->getMessage());
+    error_log("Login Error Trace: " . $e->getTraceAsString());
+    
+    // Check if it's a table missing error
+    if (strpos($e->getMessage(), "two_factor_codes") !== false || 
+        strpos($e->getMessage(), "doesn't exist") !== false) {
+        json_response(500, [
+            "ok" => false, 
+            "error" => "Database table missing. Please run the migration: config/two_factor_auth_schema.sql"
+        ]);
+    } else {
+        json_response(500, [
+            "ok" => false, 
+            "error" => "Server error: " . (ini_get('display_errors') ? $e->getMessage() : "Database connection failed")
+        ]);
+    }
+} catch (Exception $e) {
+    error_log("Login General Error: " . $e->getMessage());
+    json_response(500, [
+        "ok" => false, 
+        "error" => "Server error: " . (ini_get('display_errors') ? $e->getMessage() : "An error occurred")
+    ]);
 }

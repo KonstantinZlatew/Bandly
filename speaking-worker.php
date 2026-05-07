@@ -276,3 +276,4 @@ try {
     echo "Fatal error: " . $e->getMessage() . "\n";
     exit(1);
 }
+

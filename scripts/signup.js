@@ -46,8 +46,19 @@ form.addEventListener("submit", async function (e) {
       throw new Error(data.error || `Request failed (${res.status})`);
     }
 
-    // Redirect to homepage after successful signup
-    window.location.href = "index.php";
+    // Check if 2FA is required
+    if (data.requires_2fa) {
+      // Store email for display on 2FA page
+      localStorage.setItem('2fa_email', data.email || email);
+      // Redirect to 2FA verification page
+      window.location.href = `verify-2fa.html?email=${encodeURIComponent(data.email || email)}`;
+    } else {
+      // If 2FA failed but account was created, show message
+      showMessage(data.message || "Account created. Please login to receive verification code.", "success");
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 2000);
+    }
   } catch (err) {
     showMessage(err.message, "error");
   }

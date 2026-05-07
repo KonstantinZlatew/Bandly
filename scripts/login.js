@@ -37,8 +37,16 @@ form.addEventListener("submit", async function (e) {
       throw new Error(data.error || `Login failed (${res.status})`);
     }
 
-    // Redirect to homepage on successful login
-    window.location.href = "index.php";
+    // Check if 2FA is required
+    if (data.requires_2fa) {
+      // Store email for display on 2FA page
+      localStorage.setItem('2fa_email', data.email || email);
+      // Redirect to 2FA verification page
+      window.location.href = `verify-2fa.html?email=${encodeURIComponent(data.email || email)}`;
+    } else {
+      // Redirect to homepage if 2FA is not required (shouldn't happen with new flow)
+      window.location.href = "index.php";
+    }
 
   } catch (err) {
     showMessage(err.message, "error");

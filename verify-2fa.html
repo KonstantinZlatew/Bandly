@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify Your Email</title>
+    <link rel="stylesheet" href="css/signup.css">
+    <style>
+        .code-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 30px 0;
+        }
+        .code-input {
+            width: 50px;
+            height: 60px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        .code-input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .resend-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .resend-link {
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .resend-link:hover {
+            text-decoration: underline;
+        }
+        .resend-link:disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+        .countdown {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="signup-card">
+        <h1>Verify Your Email</h1>
+        <p class="subtitle">We've sent a 6-digit code to your email address</p>
+        <p id="email-display" class="subtitle" style="font-weight: bold; color: #007bff;"></p>
+
+        <div id="message" class="message"></div>
+
+        <form id="verifyForm">
+            <div class="code-input-container">
+                <input type="text" class="code-input" id="code1" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code2" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code3" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code4" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code5" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+                <input type="text" class="code-input" id="code6" maxlength="1" pattern="[0-9]" inputmode="numeric" autocomplete="off">
+            </div>
+            <input type="hidden" id="fullCode">
+
+            <button type="submit" id="verifyBtn">Verify</button>
+        </form>
+
+        <div class="resend-container">
+            <a href="#" id="resendLink" class="resend-link">Resend Code</a>
+            <div id="countdown" class="countdown"></div>
+        </div>
+
+        <p class="footer-text">
+            <a href="login.html">Back to Login</a>
+        </p>
+    </div>
+</div>
+
+<script src="scripts/verify-2fa.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,283 @@
+design pattern Singleton
+В проекта се използва Singleton pattern за управление на database връзката. Проблемът, който решава, 
+е че при всяко извикване на функцията db() се създаваше нова PDO инстанция, което водеше до излишни 
+database connections, натоварване на сървъра и потенциални проблеми с производителността. Singleton 
+pattern-ът гарантира, че се създава само една инстанция на PDO connection, която се използва повторно 
+при всички следващи извиквания.
+
+Приложението на pattern-а е в файла config/db.php, редове 4-24. Функцията db() използва static променлива $pdo, 
+която запазва състоянието между извикванията. При първото извикване се създава нова PDO инстанция, а при всички 
+следващи извиквания се връща същата инстанция.
+
+Извадка от кода:
+```php
+// Файл: config/db.php, редове 4-24
+function db(): PDO {
+    // Static променлива запазва стойността между извикванията
+    // Това е ключовата част от Singleton pattern-а
+    static $pdo = null;
+    
+    // Проверка дали вече съществува инстанция
+    // Ако да, я връщаме директно без да създаваме нова
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    // Първото извикване - създаваме нова инстанция
+    $host = "localhost";
+    $dbname = "ielts_evalai";
+    $user = "root";
+    $pass = "";
+    $charset = "utf8mb4";
+
+    $dsn = "mysql:host=$host;dbname=$dbname;charset=$charset";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+
+    // Създаване на PDO инстанция и запазване в static променливата
+    $pdo = new PDO($dsn, $user, $pass, $options);
+    return $pdo;
+}
+```
+
+Този pattern се използва навсякъде в проекта, където е необходима database връзка. Например в 
+includes/entitlements-check.php на ред 25 се извиква $pdo = db(), което гарантира използването на същата 
+connection инстанция. Това намалява натоварването на database сървъра и подобрява производителността на 
+приложението.
+
+
+
+
+design pattern Strategy
+В проекта се използва Strategy pattern за определяне на правата на потребителя за анализ на submissions. 
+Проблемът, който решава, е че системата трябва да поддържа различни начини за авторизация: активна абонамент, 
+безкраен достъп до определена дата, или кредити. Вместо да се използват сложни if-else конструкции, Strategy 
+pattern позволява да се дефинират различни стратегии за проверка, които могат да се сменят динамично.
+
+Приложението на pattern-а е в файла includes/entitlements-check.php, функцията checkCanAnalyze(), редове 12-134. 
+Функцията последователно прилага различни стратегии за проверка на правата: първо проверява за активна абонамент 
+(редове 28-49), след това за безкраен достъп (редове 52-72), и накрая за налични кредити (редове 75-123). Всяка 
+стратегия има своя логика и връща резултат в един и същ формат.
+
+Извадка от кода:
+```php
+// Файл: includes/entitlements-check.php, редове 12-134
+function checkCanAnalyze($userId) {
+    require_once __DIR__ . "/../config/db.php";
+    
+    if (!$userId) {
+        return [
+            'can_analyze' => false,
+            'reason' => 'User not authenticated',
+            'has_subscription' => false,
+            'credits_remaining' => 0
+        ];
+    }
+    
+    try {
+        $pdo = db();
+        
+        // СТРАТЕГИЯ 1: Проверка за активна абонамент
+        // Това е първата стратегия - ако потребителят има активна абонамент,
+        // той има пълен достъп без ограничения
+        $stmt = $pdo->prepare("
+            SELECT us.current_period_end, p.name as plan_name
+            FROM user_subscriptions us
+            JOIN plans p ON p.id = us.plan_id
+            WHERE us.user_id = :user_id 
+            AND us.status IN ('active', 'trialing')
+            AND (us.current_period_end IS NULL OR us.current_period_end > NOW())
+            ORDER BY us.current_period_end DESC
+            LIMIT 1
+        ");
+        $stmt->execute(["user_id" => $userId]);
+        $subscription = $stmt->fetch();
+        
+        if ($subscription) {
+            // Стратегията за абонамент е успешна - връщаме резултат
+            return [
+                'can_analyze' => true,
+                'reason' => 'Active subscription',
+                'has_subscription' => true,
+                'credits_remaining' => 0
+            ];
+        }
+        
+        // СТРАТЕГИЯ 2: Проверка за безкраен достъп до дата
+        // Ако първата стратегия не е успешна, опитваме втората
+        $stmt = $pdo->prepare("
+            SELECT unlimited_until 
+            FROM user_entitlements 
+            WHERE user_id = :user_id
+            LIMIT 1
+        ");
+        $stmt->execute(["user_id" => $userId]);
+        $entitlement = $stmt->fetch();
+        
+        if ($entitlement && $entitlement['unlimited_until']) {
+            $unlimitedDate = new DateTime($entitlement['unlimited_until']);
+            $now = new DateTime();
+            if ($unlimitedDate > $now) {
+                // Стратегията за безкраен достъп е успешна
+                return [
+                    'can_analyze' => true,
+                    'reason' => 'Unlimited access until ' . $entitlement['unlimited_until'],
+                    'has_subscription' => true,
+                    'credits_remaining' => 0
+                ];
+            }
+        }
+        
+        // СТРАТЕГИЯ 3: Проверка за налични кредити
+        // Ако първите две стратегии не са успешни, опитваме третата
+        $stmt = $pdo->prepare("
+            SELECT credits_balance 
+            FROM user_entitlements 
+            WHERE user_id = :user_id
+            LIMIT 1
+        ");
+        $stmt->execute(["user_id" => $userId]);
+        $entitlement = $stmt->fetch();
+        
+        if (!$entitlement) {
+            // Създаване на default entitlements ако не съществуват
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_entitlements (user_id, credits_balance)
+                    VALUES (:user_id, 0)
+                ");
+                $stmt->execute(["user_id" => $userId]);
+                $creditsBalance = 0;
+            } catch (PDOException $e) {
+                // Fallback логика при грешка
+                $stmt = $pdo->prepare("
+                    SELECT credits_balance 
+                    FROM user_entitlements 
+                    WHERE user_id = :user_id
+                    LIMIT 1
+                ");
+                $stmt->execute(["user_id" => $userId]);
+                $entitlement = $stmt->fetch();
+                $creditsBalance = $entitlement ? (int)($entitlement["credits_balance"] ?? 0) : 0;
+            }
+        } else {
+            $creditsBalance = (int)($entitlement["credits_balance"] ?? 0);
+        }
+        
+        // Прилагане на стратегията за кредити
+        if ($creditsBalance > 0) {
+            return [
+                'can_analyze' => true,
+                'reason' => 'Has credits available',
+                'has_subscription' => false,
+                'credits_remaining' => $creditsBalance
+            ];
+        } else {
+            return [
+                'can_analyze' => false,
+                'reason' => 'No credits remaining. Please purchase credits or a subscription.',
+                'has_subscription' => false,
+                'credits_remaining' => 0
+            ];
+        }
+        
+    } catch (Exception $e) {
+        error_log("Entitlements check error: " . $e->getMessage());
+        return [
+            'can_analyze' => false,
+            'reason' => 'Error checking entitlements: ' . $e->getMessage(),
+            'has_subscription' => false,
+            'credits_remaining' => 0
+        ];
+    }
+}
+```
+
+Този pattern позволява лесно добавяне на нови стратегии за авторизация в бъдеще, без да се променя основната 
+логика. Например, може да се добави стратегия за временни промоции или групови лицензи. Всички стратегии връщат 
+един и същ формат на резултат, което прави кода по-чист и по-лесен за поддръжка.
+
+
+
+
+design pattern Facade
+В проекта се използва Facade pattern за опростяване на работата с authentication системата. Проблемът, който 
+решава, е че управлението на cookies, проверката на authentication статуса и достъпът до user данни изисква 
+сложна логика, която е разпръсната на различни места. Facade pattern предоставя опростен интерфейс, който скрива 
+сложността на подсистемата и позволява на клиентския код да работи с прости функции вместо да се занимава с 
+детайли като cookie параметри, PHP версии и security настройки.
+
+Приложението на pattern-а е в файла config/auth.php, редове 1-159. Фасадата предоставя набор от функции като 
+isAuthenticated(), getUserId(), getUsername(), setUserCookies(), които скриват сложността на работата с cookies, 
+проверката на PHP версиите и управлението на security параметрите. Вместо да се пише сложен код навсякъде, където 
+е необходима authentication проверка, се използват тези прости функции.
+
+Извадка от кода:
+```php
+// Файл: config/auth.php, редове 12-31
+// Фасада функция за задаване на cookie с автоматично управление на security параметрите
+function setAuthCookie(string $name, string $value, int $expire = 604800): void {
+    $expireTime = time() + $expire;
+    // Фасадата автоматично определя дали да използва secure cookies
+    $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+    $httponly = true;
+    $samesite = 'Lax';
+    
+    // Фасадата скрива сложността на различните PHP версии
+    // Клиентският код не трябва да знае за тези детайли
+    if (PHP_VERSION_ID >= 70300) {
+        setcookie($name, $value, [
+            'expires' => $expireTime,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $secure,
+            'httponly' => $httponly,
+            'samesite' => $samesite
+        ]);
+    } else {
+        // Fallback за по-стари PHP версии - скрито от клиента
+        setcookie($name, $value, $expireTime, '/', '', $secure, $httponly);
+    }
+}
+
+// Файл: config/auth.php, редове 100-102
+// Проста фасада функция за проверка на authentication
+// Скрива сложността на проверката на cookies
+function isAuthenticated(): bool {
+    return isset($_COOKIE['user_id']) && !empty($_COOKIE['user_id']);
+}
+
+// Файл: config/auth.php, редове 108-113
+// Фасада функция за получаване на user ID
+// Автоматично прави type casting и проверки
+function getUserId(): ?int {
+    if (!isAuthenticated()) {
+        return null;
+    }
+    return (int)$_COOKIE['user_id'];
+}
+
+// Файл: config/auth.php, редове 74-83
+// Фасада функция, която скрива сложността на задаването на множество cookies
+// Клиентът просто подава данните, а фасадата се грижи за всички детайли
+function setUserCookies(int $userId, string $username, string $email, int $isAdmin = 0, ?string $profilePicUrl = null): void {
+    setAuthCookie('user_id', (string)$userId);
+    setAuthCookie('username', $username);
+    setAuthCookie('email', $email);
+    setAuthCookie('is_admin', (string)$isAdmin);
+    
+    if ($profilePicUrl !== null) {
+        setAuthCookie('profile_picture_url', $profilePicUrl);
+    }
+}
+```
+
+Използването на този pattern в проекта може да се види в множество файлове. Например в api/submission-save.php 
+на редове 17-24 се използват фасада функциите isAuthenticated() и getUserId() вместо да се пише сложен код за 
+проверка на cookies. В index.php на ред 10 се използва getUserId() за получаване на user ID с едно просто 
+извикване, вместо да се пише код за проверка на $_COOKIE['user_id'], type casting и валидация. Това прави 
+кода по-четим, по-лесен за поддръжка и по-малко податлив на грешки.
+

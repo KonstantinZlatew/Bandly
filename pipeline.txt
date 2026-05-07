@@ -1,0 +1,11 @@
+Repo: https://github.com/KonstantinZlatew/IELTS-AI-Evaluator
+
+GitHub Actions
+GitHub Actions workflow-ът е настроен в файла .github/workflows/ci.yml и се активира автоматично при всеки push или pull request към main branch-а. Workflow-ът се състои от два отделни job-а: lint и test, които се изпълняват паралелно за по-бързо време на изпълнение. При успешно изпълнение на всички стъпки, workflow-ът показва зелен статус и позволява merge на pull request-а. При неуспех на някоя от стъпките (linter грешки, пропанали тестове или синтактични грешки), workflow-ът показва червен статус и блокира merge-а, като показва детайлна информация за грешките в Actions таба на GitHub.
+
+Pipeline Tests
+Unit тестовете се изпълняват чрез PHPUnit в job-а test (редове 28-58 в ci.yml). Първо се инсталират зависимостите чрез composer install (ред 45), след което се стартират тестовете с командата vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml (ред 48). PHPUnit конфигурацията се намира в phpunit.xml файла, който дефинира тестовия suite Unit (ред 12-14 в phpunit.xml), bootstrap файла tests/bootstrap.php (ред 5 в phpunit.xml) и coverage настройките за включване на директориите includes и config (редове 17-23 в phpunit.xml). Тестовете покриват основните функции от includes/entitlements-check.php и includes/entitlements-deduct.php, както и помощни функции за валидация и работа със strings. Coverage резултатите се генерират в coverage.xml и се качват в Codecov (редове 50-56 в ci.yml).
+
+Pipeline Linter
+Linter-ът се изпълнява чрез PHP CodeSniffer в job-а lint (редове 7-26 в ci.yml). Първо се инсталират зависимостите чрез composer install (ред 20), след което се стартива linter-ът с командата vendor/bin/phpcs --standard=phpcs.xml (ред 23). PHP CodeSniffer конфигурацията се намира в phpcs.xml файла, който използва PSR12 coding standard (ред 15 в phpcs.xml). Linter-ът проверява целия проект (ред 6 в phpcs.xml), но изключва директориите vendor, node_modules и uploads (редове 9-12 в phpcs.xml). Допълнително, linter-ът показва цветен output (ред 18 в phpcs.xml) и пълен отчет за всички намерени проблеми (ред 19 в phpcs.xml). При намиране на coding standard нарушения, linter-ът връща ненулев exit code, което кара GitHub Actions да маркира job-а като неуспешен.
+
