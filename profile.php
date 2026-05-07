@@ -2,8 +2,8 @@
 require_once __DIR__ . "/config/auth.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 ?>

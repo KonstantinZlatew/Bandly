@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once __DIR__ . "/config/auth.php";
@@ -96,7 +97,6 @@ try {
 
     header("Location: " . $session->url, true, 303);
     exit;
-
 } catch (\Stripe\Exception\ApiErrorException $e) {
     http_response_code(500);
     error_log("Stripe API error: " . $e->getMessage());

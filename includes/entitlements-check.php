@@ -1,17 +1,19 @@
 <?php
+
 /**
  * Check if a user can analyze a submission (speaking or writing) (wheather he has subscription or credits)
- * 
- * @param int $userId The user ID to check
+ *
+ * @param integer $userId The user ID to check.
  * @return array Returns array with:
  *   - can_analyze: bool - Whether user can analyze
  *   - reason: string - Reason if cannot analyze
  *   - has_subscription: bool - Whether user has active subscription
  *   - credits_remaining: int - Number of credits remaining (0 if subscription)
  */
-function checkCanAnalyze($userId) {
+function checkCanAnalyze(int $userId)
+{
+
     require_once __DIR__ . "/../config/db.php";
-    
     if (!$userId) {
         return [
             'can_analyze' => false,
@@ -20,11 +22,10 @@ function checkCanAnalyze($userId) {
             'credits_remaining' => 0
         ];
     }
-    
+
     try {
         $pdo = db();
-        
-        // First, check for active subscription
+// First, check for active subscription
         $stmt = $pdo->prepare("
             SELECT us.current_period_end, p.name as plan_name
             FROM user_subscriptions us
@@ -37,9 +38,8 @@ function checkCanAnalyze($userId) {
         ");
         $stmt->execute(["user_id" => $userId]);
         $subscription = $stmt->fetch();
-        
         if ($subscription) {
-            // User has active subscription
+        // User has active subscription
             return [
                 'can_analyze' => true,
                 'reason' => 'Active subscription',
@@ -47,7 +47,7 @@ function checkCanAnalyze($userId) {
                 'credits_remaining' => 0 // Unlimited, so credits don't matter
             ];
         }
-        
+
         // Check unlimited_until from user_entitlements
         $stmt = $pdo->prepare("
             SELECT unlimited_until 
@@ -57,7 +57,6 @@ function checkCanAnalyze($userId) {
         ");
         $stmt->execute(["user_id" => $userId]);
         $entitlement = $stmt->fetch();
-        
         if ($entitlement && $entitlement['unlimited_until']) {
             $unlimitedDate = new DateTime($entitlement['unlimited_until']);
             $now = new DateTime();
@@ -70,7 +69,7 @@ function checkCanAnalyze($userId) {
                 ];
             }
         }
-        
+
         // No subscription, check credits
         $stmt = $pdo->prepare("
             SELECT credits_balance 
@@ -80,9 +79,8 @@ function checkCanAnalyze($userId) {
         ");
         $stmt->execute(["user_id" => $userId]);
         $entitlement = $stmt->fetch();
-        
         if (!$entitlement) {
-            // Create default entitlements if they don't exist
+        // Create default entitlements if they don't exist
             try {
                 $stmt = $pdo->prepare("
                     INSERT INTO user_entitlements (user_id, credits_balance)
@@ -91,7 +89,7 @@ function checkCanAnalyze($userId) {
                 $stmt->execute(["user_id" => $userId]);
                 $creditsBalance = 0;
             } catch (PDOException $e) {
-                // If insert fails, try to fetch again
+        // If insert fails, try to fetch again
                 $stmt = $pdo->prepare("
                     SELECT credits_balance 
                     FROM user_entitlements 
@@ -105,7 +103,7 @@ function checkCanAnalyze($userId) {
         } else {
             $creditsBalance = (int)($entitlement["credits_balance"] ?? 0);
         }
-        
+
         if ($creditsBalance > 0) {
             return [
                 'can_analyze' => true,
@@ -121,7 +119,6 @@ function checkCanAnalyze($userId) {
                 'credits_remaining' => 0
             ];
         }
-        
     } catch (Exception $e) {
         error_log("Entitlements check error: " . $e->getMessage());
         return [

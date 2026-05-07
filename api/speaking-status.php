@@ -1,18 +1,27 @@
 <?php
+
 /**
  * Speaking Submission Status Endpoint
- * 
+ *
  * Returns the current status and analysis result for a speaking submission.
  */
 
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
-
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
+
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -28,15 +37,13 @@ if ($userId === null) {
 }
 
 $submissionId = isset($_GET['id']) ? (int)$_GET['id'] : null;
-
 if (!$submissionId) {
     json_response(400, ["ok" => false, "error" => "Missing submission ID"]);
 }
 
 try {
     $pdo = db();
-    
-    // Fetch submission (only if it belongs to the user)
+// Fetch submission (only if it belongs to the user)
     $stmt = $pdo->prepare("
         SELECT 
             id,
@@ -53,11 +60,10 @@ try {
     ");
     $stmt->execute([$submissionId, $userId]);
     $submission = $stmt->fetch();
-    
     if (!$submission) {
         json_response(404, ["ok" => false, "error" => "Submission not found"]);
     }
-    
+
     // Parse JSON result if present
     $analysisResult = null;
     if ($submission['analysis_result']) {
@@ -66,7 +72,7 @@ try {
             $analysisResult = null;
         }
     }
-    
+
     json_response(200, [
         "ok" => true,
         "submission" => [
@@ -80,16 +86,14 @@ try {
             "audio_duration_seconds" => $submission['audio_duration_seconds'] ? (int)$submission['audio_duration_seconds'] : null
         ]
     ]);
-    
 } catch (PDOException $e) {
     json_response(500, [
-        "ok" => false, 
+        "ok" => false,
         "error" => "Database error"
     ]);
 } catch (Exception $e) {
     json_response(500, [
-        "ok" => false, 
+        "ok" => false,
         "error" => "Server error"
     ]);
 }
-

@@ -1,15 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
-
 error_reporting(E_ALL);
-
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
 require_once __DIR__ . "/../config/two_factor.php";
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
+
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -27,7 +35,6 @@ if (!is_array($data)) {
 }
 
 $code = trim((string)($data["code"] ?? ""));
-
 // Validation
 if ($code === "" || strlen($code) !== 6) {
     json_response(400, ["ok" => false, "error" => "Please enter a valid 6-digit code."]);
@@ -40,7 +47,6 @@ if (!$pendingUid || !ctype_digit($pendingUid)) {
 
 try {
     $pdo = db();
-
     $userId = (int)$pendingUid;
     $stmt = $pdo->prepare("SELECT id, username, email, is_admin FROM users WHERE id = :id LIMIT 1");
     $stmt->execute(["id" => $userId]);
@@ -50,25 +56,17 @@ try {
     }
 
     $email = (string)$userData['email'];
-
-    // Verify the 2FA code
+// Verify the 2FA code
     if (!verify2FACode($userId, $email, $code)) {
         json_response(401, ["ok" => false, "error" => "Invalid or expired verification code."]);
     }
-    
+
     // Code is valid - set authentication cookies
-    setUserCookies(
-        $userId,
-        (string)$userData['username'],
-        $email,
-        (int)($userData['is_admin'] ?? 0)
-    );
-    
-    // Update last_login
+    setUserCookies($userId, (string)$userData['username'], $email, (int)($userData['is_admin'] ?? 0));
+// Update last_login
     $upd = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = :id");
     $upd->execute(["id" => $userId]);
-    
-    // Clear the pending UID cookie
+// Clear the pending UID cookie
     setcookie('2fa_pending_uid', '', [
         'expires'  => time() - 3600,
         'path'     => '/',
@@ -77,7 +75,6 @@ try {
         'httponly' => true,
         'samesite' => 'Lax',
     ]);
-    
     json_response(200, [
         "ok" => true,
         "message" => "Verification successful. Logging you in...",
@@ -88,9 +85,7 @@ try {
             "is_admin" => (int)($userData['is_admin'] ?? 0)
         ]
     ]);
-
 } catch (PDOException $e) {
     error_log("2FA Verification Error: " . $e->getMessage());
     json_response(500, ["ok" => false, "error" => "Server error."]);
 }
-

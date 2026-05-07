@@ -16,10 +16,10 @@ class StringHelperTest extends TestCase
     {
         $text = "This is a test sentence with multiple words";
         $wordCount = str_word_count($text);
-        
+
         $this->assertEquals(8, $wordCount);
     }
-    
+
     /**
      * Test word count with empty string
      */
@@ -27,10 +27,10 @@ class StringHelperTest extends TestCase
     {
         $text = "";
         $wordCount = str_word_count($text);
-        
+
         $this->assertEquals(0, $wordCount);
     }
-    
+
     /**
      * Test word count with special characters
      */
@@ -38,10 +38,10 @@ class StringHelperTest extends TestCase
     {
         $text = "Hello, world! How are you?";
         $wordCount = str_word_count($text);
-        
+
         $this->assertGreaterThan(0, $wordCount);
     }
-    
+
     /**
      * Test JSON encoding and decoding
      */
@@ -54,16 +54,16 @@ class StringHelperTest extends TestCase
             'LR' => 7.5,
             'GRA' => 7.0
         ];
-        
+
         $encoded = json_encode($data);
         $decoded = json_decode($encoded, true);
-        
+
         $this->assertIsString($encoded);
         $this->assertIsArray($decoded);
         $this->assertEquals($data, $decoded);
         $this->assertEquals(7.5, $decoded['overall_band']);
     }
-    
+
     /**
      * Test date formatting
      */
@@ -71,11 +71,11 @@ class StringHelperTest extends TestCase
     {
         $timestamp = '2024-01-15 10:30:00';
         $formatted = date('Y-m-d H:i', strtotime($timestamp));
-        
+
         $this->assertIsString($formatted);
         $this->assertEquals('2024-01-15 10:30', $formatted);
     }
-    
+
     /**
      * Test array key existence
      */
@@ -87,7 +87,7 @@ class StringHelperTest extends TestCase
             'has_subscription' => true,
             'credits_remaining' => 0
         ];
-        
+
         $this->assertArrayHasKey('can_analyze', $array);
         $this->assertArrayHasKey('reason', $array);
         $this->assertArrayHasKey('has_subscription', $array);
@@ -96,4 +96,3 @@ class StringHelperTest extends TestCase
         $this->assertTrue($array['has_subscription']);
     }
 }
-

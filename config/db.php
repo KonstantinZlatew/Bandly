@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 // Load environment variables if .env file exists
@@ -11,7 +12,13 @@ if (file_exists(__DIR__ . "/../.env")) {
     }
 }
 
-function db(): PDO {
+/**
+ * Get singleton PDO database connection.
+ *
+ * @return PDO
+ */
+function db(): PDO
+{
     static $pdo = null;
     if ($pdo instanceof PDO) {
         return $pdo;

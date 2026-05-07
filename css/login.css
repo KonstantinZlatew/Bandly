@@ -4,7 +4,7 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
   }
-  
+
   body {
     min-height: 100vh;
     background: #f4f6fb;
@@ -12,14 +12,14 @@
     justify-content: center;
     align-items: center;
   }
-  
+
   .container {
     width: 100%;
     display: flex;
     justify-content: center;
     padding: 20px;
   }
-  
+
   .login-card {
     width: 380px;
     background: #fff;
@@ -27,28 +27,28 @@
     border-radius: 14px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
   }
-  
+
   .login-card h1 {
     font-size: 28px;
     margin-bottom: 6px;
   }
-  
+
   .subtitle {
     color: #666;
     margin-bottom: 18px;
   }
-  
+
   .input-group {
     margin-bottom: 14px;
   }
-  
+
   label {
     display: block;
     font-size: 14px;
     margin-bottom: 6px;
     color: #333;
   }
-  
+
   input {
     width: 100%;
     padding: 12px;
@@ -57,11 +57,11 @@
     outline: none;
     font-size: 14px;
   }
-  
+
   input:focus {
     border-color: #6c63ff;
   }
-  
+
   button {
     width: 100%;
     border: none;
@@ -73,24 +73,24 @@
     color: #fff;
     margin-top: 8px;
   }
-  
+
   button:hover {
     opacity: 0.95;
   }
-  
+
   .footer-text {
     margin-top: 18px;
     font-size: 14px;
     text-align: center;
     color: #444;
   }
-  
+
   .footer-text a {
     color: #6c63ff;
     text-decoration: none;
     font-weight: bold;
   }
-  
+
   .message {
     display: none;
     padding: 10px 12px;
@@ -98,13 +98,13 @@
     margin-bottom: 14px;
     font-size: 14px;
   }
-  
+
   .message.success {
     background: #e7f8ee;
     color: #1f7a3a;
     border: 1px solid #bfe9cc;
   }
-  
+
   .message.error {
     background: #fde8e8;
     color: #b42318;

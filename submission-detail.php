@@ -3,8 +3,8 @@ require_once __DIR__ . "/config/auth.php";
 require_once __DIR__ . "/config/db.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 $userId = getUserId() ?? 0;
@@ -20,8 +20,8 @@ $submissionId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 // Fetch submission details
 $submission = null;
 try {
-  $pdo = db();
-  $stmt = $pdo->prepare("
+    $pdo = db();
+    $stmt = $pdo->prepare("
     SELECT 
       ws.id,
       ws.task_type,
@@ -41,26 +41,26 @@ try {
     WHERE ws.id = ? AND ws.user_id = ?
     LIMIT 1
   ");
-  $stmt->execute([$submissionId, $userId]);
-  $submission = $stmt->fetch();
-  
-  if (!$submission) {
+    $stmt->execute([$submissionId, $userId]);
+    $submission = $stmt->fetch();
+
+    if (!$submission) {
+        header("Location: index.php");
+        exit;
+    }
+
+    $result = null;
+    if ($submission['status'] === 'done' && $submission['analysis_result']) {
+        $result = json_decode($submission['analysis_result'], true);
+    }
+
+    $taskTypeLabel = ucfirst(str_replace('_', ' ', $submission['task_type'] ?? 'Unknown'));
+    if ($submission['exam_type']) {
+        $taskTypeLabel = ucfirst($submission['exam_type']) . ' Task ' . ($submission['task_number'] ?? '?');
+    }
+} catch (Exception $e) {
     header("Location: index.php");
     exit;
-  }
-  
-  $result = null;
-  if ($submission['status'] === 'done' && $submission['analysis_result']) {
-    $result = json_decode($submission['analysis_result'], true);
-  }
-  
-  $taskTypeLabel = ucfirst(str_replace('_', ' ', $submission['task_type'] ?? 'Unknown'));
-  if ($submission['exam_type']) {
-    $taskTypeLabel = ucfirst($submission['exam_type']) . ' Task ' . ($submission['task_number'] ?? '?');
-  }
-} catch (Exception $e) {
-  header("Location: index.php");
-  exit;
 }
 ?>
 <!DOCTYPE html>
@@ -85,9 +85,9 @@ try {
   </div>
 
   <a class="avatar-link" href="profile.php" title="Profile">
-    <?php if ($profilePic): ?>
+    <?php if ($profilePic) : ?>
       <img class="avatar" src="<?php echo htmlspecialchars($profilePic); ?>" alt="Profile picture">
-    <?php else: ?>
+    <?php else : ?>
       <div class="avatar-fallback" style="background: <?php echo htmlspecialchars($bg); ?>;">
         <?php echo htmlspecialchars($initial); ?>
       </div>
@@ -131,7 +131,7 @@ try {
     <div class="results-panel">
       <h2>Analysis Results</h2>
       <div class="results-content">
-        <?php if ($result): ?>
+        <?php if ($result) : ?>
           <div class="analysis-result">
             <div class="score-section">
               <h3>Overall Band Score</h3>
@@ -145,47 +145,47 @@ try {
               <div class="score-item"><strong>GRA:</strong> <?php echo htmlspecialchars($result['GRA'] ?? 'N/A'); ?></div>
             </div>
 
-            <?php if (isset($result['notes'])): ?>
+            <?php if (isset($result['notes'])) : ?>
               <div class="notes-section">
                 <h3>Notes</h3>
-                <?php if (isset($result['notes']['TR'])): ?>
+                <?php if (isset($result['notes']['TR'])) : ?>
                   <p><strong>TR:</strong> <?php echo htmlspecialchars($result['notes']['TR']); ?></p>
                 <?php endif; ?>
-                <?php if (isset($result['notes']['CC'])): ?>
+                <?php if (isset($result['notes']['CC'])) : ?>
                   <p><strong>CC:</strong> <?php echo htmlspecialchars($result['notes']['CC']); ?></p>
                 <?php endif; ?>
-                <?php if (isset($result['notes']['LR'])): ?>
+                <?php if (isset($result['notes']['LR'])) : ?>
                   <p><strong>LR:</strong> <?php echo htmlspecialchars($result['notes']['LR']); ?></p>
                 <?php endif; ?>
-                <?php if (isset($result['notes']['GRA'])): ?>
+                <?php if (isset($result['notes']['GRA'])) : ?>
                   <p><strong>GRA:</strong> <?php echo htmlspecialchars($result['notes']['GRA']); ?></p>
                 <?php endif; ?>
               </div>
             <?php endif; ?>
 
-            <?php if (isset($result['overall_comment'])): ?>
+            <?php if (isset($result['overall_comment'])) : ?>
               <div class="comment-section">
                 <h3>Overall Comment</h3>
                 <p><?php echo htmlspecialchars($result['overall_comment']); ?></p>
               </div>
             <?php endif; ?>
 
-            <?php if (isset($result['improvement_plan']) && is_array($result['improvement_plan'])): ?>
+            <?php if (isset($result['improvement_plan']) && is_array($result['improvement_plan'])) : ?>
               <div class="improvement-section">
                 <h3>Improvement Plan</h3>
                 <ul>
-                  <?php foreach ($result['improvement_plan'] as $item): ?>
+                  <?php foreach ($result['improvement_plan'] as $item) : ?>
                     <li><?php echo htmlspecialchars($item); ?></li>
                   <?php endforeach; ?>
                 </ul>
               </div>
             <?php endif; ?>
           </div>
-        <?php elseif ($submission['status'] === 'failed'): ?>
+        <?php elseif ($submission['status'] === 'failed') : ?>
           <div class="error-message">
             <p>Analysis failed: <?php echo htmlspecialchars($submission['error_message'] ?? 'Unknown error'); ?></p>
           </div>
-        <?php else: ?>
+        <?php else : ?>
           <div class="processing-message">
             <p>Analysis <?php echo htmlspecialchars($submission['status']); ?>...</p>
           </div>

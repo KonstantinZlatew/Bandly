@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
@@ -9,7 +10,15 @@ require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
 require_once __DIR__ . "/../config/two_factor.php";
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -68,8 +77,10 @@ try {
 
         if (!$result['success']) {
             $errorMsg = $result['error'] ?? "Failed to send verification code.";
-            if (strpos($errorMsg, "two_factor_codes") !== false ||
-                strpos($errorMsg, "does not exist") !== false) {
+            if (
+                strpos($errorMsg, "two_factor_codes") !== false ||
+                strpos($errorMsg, "does not exist") !== false
+            ) {
                 json_response(500, [
                     "ok" => false,
                     "error" => "Database setup incomplete. Please run: config/two_factor_auth_schema.sql"
@@ -103,28 +114,29 @@ try {
         "requires_2fa" => true,
         "email" => (string)$user["email"]
     ]);
-
 } catch (PDOException $e) {
     error_log("Login Error: " . $e->getMessage());
     error_log("Login Error Trace: " . $e->getTraceAsString());
-    
+
     // Check if it's a table missing error
-    if (strpos($e->getMessage(), "two_factor_codes") !== false || 
-        strpos($e->getMessage(), "doesn't exist") !== false) {
+    if (
+        strpos($e->getMessage(), "two_factor_codes") !== false ||
+        strpos($e->getMessage(), "doesn't exist") !== false
+    ) {
         json_response(500, [
-            "ok" => false, 
+            "ok" => false,
             "error" => "Database table missing. Please run the migration: config/two_factor_auth_schema.sql"
         ]);
     } else {
         json_response(500, [
-            "ok" => false, 
+            "ok" => false,
             "error" => "Server error: " . (ini_get('display_errors') ? $e->getMessage() : "Database connection failed")
         ]);
     }
 } catch (Exception $e) {
     error_log("Login General Error: " . $e->getMessage());
     json_response(500, [
-        "ok" => false, 
+        "ok" => false,
         "error" => "Server error: " . (ini_get('display_errors') ? $e->getMessage() : "An error occurred")
     ]);
 }

@@ -14,7 +14,7 @@ $bg = $colors[$userId % count($colors)];
 ?>
 <header class="topbar">
   <div class="topbar-left">
-    <?php if (!$isIndexPage): ?>
+    <?php if (!$isIndexPage) : ?>
       <a class="back-btn" href="index.php" title="Back to home">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -22,9 +22,9 @@ $bg = $colors[$userId % count($colors)];
       </a>
     <?php endif; ?>
     <div class="hello">
-      <?php if ($isIndexPage): ?>
+      <?php if ($isIndexPage) : ?>
         Hi, <span class="name"><?php echo htmlspecialchars($username); ?></span>
-      <?php else: ?>
+      <?php else : ?>
         <span class="name"><?php echo htmlspecialchars($username); ?></span>
       <?php endif; ?>
     </div>
@@ -35,9 +35,9 @@ $bg = $colors[$userId % count($colors)];
   </div>
 
   <a class="avatar-link" href="profile.php" title="Profile">
-    <?php if ($profilePic): ?>
+    <?php if ($profilePic) : ?>
       <img class="avatar" src="<?php echo htmlspecialchars($profilePic); ?>" alt="Profile picture">
-    <?php else: ?>
+    <?php else : ?>
       <div class="avatar-fallback" style="background: <?php echo htmlspecialchars($bg); ?>;">
         <?php echo htmlspecialchars($initial); ?>
       </div>

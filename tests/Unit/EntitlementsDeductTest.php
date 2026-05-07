@@ -15,25 +15,25 @@ class EntitlementsDeductTest extends TestCase
     public function testDeductCreditForAnalysisWithNullUserId(): void
     {
         $result = deductCreditForAnalysis(null);
-        
+
         $this->assertIsArray($result);
         $this->assertFalse($result['success']);
         $this->assertEquals('User not authenticated', $result['message']);
         $this->assertEquals(0, $result['credits_remaining']);
     }
-    
+
     /**
      * Test deductCreditForAnalysis with zero user ID
      */
     public function testDeductCreditForAnalysisWithZeroUserId(): void
     {
         $result = deductCreditForAnalysis(0);
-        
+
         $this->assertIsArray($result);
         $this->assertFalse($result['success']);
         $this->assertEquals('User not authenticated', $result['message']);
     }
-    
+
     /**
      * Test that deductCreditForAnalysis returns correct structure
      */
@@ -41,7 +41,7 @@ class EntitlementsDeductTest extends TestCase
     {
         // This test will fail if database is not available, but tests structure
         $result = deductCreditForAnalysis(999999);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('success', $result);
         $this->assertArrayHasKey('message', $result);
@@ -51,4 +51,3 @@ class EntitlementsDeductTest extends TestCase
         $this->assertIsInt($result['credits_remaining']);
     }
 }
-

@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(Get-ChildItem \"C:\\\\xampp\\\\apache\\\\logs\\\\\" | Select-Object Name, LastWriteTime, Length *)"
+      "Bash(Get-ChildItem \"C:\\\\xampp\\\\apache\\\\logs\\\\\" | Select-Object Name, LastWriteTime, Length *)",
+      "Bash(vendor/bin/phpcbf)",
+      "Bash(vendor/bin/phpcs)",
+      "Bash(vendor/bin/phpcs config/)",
+      "Bash(vendor/bin/phpcs api/login.php api/logout.php api/signup.php)",
+      "Bash(vendor/bin/phpcs api/stripe-webhook.php)"
     ]
   }
 }

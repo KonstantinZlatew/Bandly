@@ -2,12 +2,14 @@
 require_once __DIR__ . "/config/auth.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 $type = $_GET["type"] ?? "academic";
-if ($type !== "academic" && $type !== "general") $type = "academic";
+if ($type !== "academic" && $type !== "general") {
+    $type = "academic";
+}
 $title = ($type === "general") ? "IELTS General" : "IELTS Academic";
 
 ?>
