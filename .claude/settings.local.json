@@ -6,7 +6,8 @@
       "Bash(vendor/bin/phpcs)",
       "Bash(vendor/bin/phpcs config/)",
       "Bash(vendor/bin/phpcs api/login.php api/logout.php api/signup.php)",
-      "Bash(vendor/bin/phpcs api/stripe-webhook.php)"
+      "Bash(vendor/bin/phpcs api/stripe-webhook.php)",
+      "Bash(echo \"Exit code: $?\")"
     ]
   }
 }
