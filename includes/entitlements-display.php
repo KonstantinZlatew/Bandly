@@ -17,11 +17,11 @@ if ($userId === null) {
 
 try {
     // #region agent log
-    file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id'=>'log_'.time().'_display1','timestamp'=>time()*1000,'location'=>'entitlements-display.php:13','message'=>'Display function called','data'=>['userId'=>$userId],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'E'])."\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id' => 'log_' . time() . '_display1','timestamp' => time() * 1000,'location' => 'entitlements-display.php:13','message' => 'Display function called','data' => ['userId' => $userId],'sessionId' => 'debug-session','runId' => 'run1','hypothesisId' => 'E']) . "\n", FILE_APPEND);
     // #endregion
-    
+
     $pdo = db();
-    
+
     // Get user entitlements
     $stmt = $pdo->prepare("
         SELECT credits_balance, unlimited_until 
@@ -31,11 +31,11 @@ try {
     ");
     $stmt->execute(["user_id" => $userId]);
     $entitlements = $stmt->fetch();
-    
+
     // #region agent log
-    file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id'=>'log_'.time().'_display2','timestamp'=>time()*1000,'location'=>'entitlements-display.php:24','message'=>'Entitlements query result','data'=>['found'=>!empty($entitlements),'creditsBalance'=>$entitlements['credits_balance']??null],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'E'])."\n", FILE_APPEND);
+    file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id' => 'log_' . time() . '_display2','timestamp' => time() * 1000,'location' => 'entitlements-display.php:24','message' => 'Entitlements query result','data' => ['found' => !empty($entitlements),'creditsBalance' => $entitlements['credits_balance'] ?? null],'sessionId' => 'debug-session','runId' => 'run1','hypothesisId' => 'E']) . "\n", FILE_APPEND);
     // #endregion
-    
+
     if (!$entitlements) {
         // Create default entitlements if they don't exist
         try {
@@ -68,7 +68,7 @@ try {
         $creditsBalance = (int)($entitlements["credits_balance"] ?? 0);
         $unlimitedUntil = $entitlements["unlimited_until"] ?? null;
     }
-    
+
     // Get active subscription if exists
     $stmt = $pdo->prepare("
         SELECT us.current_period_end, p.name as plan_name
@@ -81,11 +81,11 @@ try {
     ");
     $stmt->execute(["user_id" => $userId]);
     $subscription = $stmt->fetch();
-    
+
     $hasUnlimited = false;
     $unlimitedUntilDate = null;
     $planName = null;
-    
+
     if ($subscription) {
         $hasUnlimited = true;
         $unlimitedUntilDate = $subscription["current_period_end"];
@@ -98,8 +98,7 @@ try {
             $unlimitedUntilDate = $unlimitedUntil;
         }
     }
-}
-catch (Exception $e) {
+} catch (Exception $e) {
     // Log error for debugging (remove in production or use proper logging)
     error_log("Entitlements display error: " . $e->getMessage());
     $creditsBalance = 0;
@@ -110,12 +109,12 @@ catch (Exception $e) {
 ?>
 
 <div class="entitlements-bar">
-    <?php if ($hasUnlimited && $unlimitedUntilDate): ?>
+    <?php if ($hasUnlimited && $unlimitedUntilDate) : ?>
         <div class="entitlement-item subscription">
             <span class="entitlement-label">Subscription:</span>
             <span class="entitlement-value">
                 <?php echo htmlspecialchars($planName ?? "Unlimited"); ?>
-                <?php 
+                <?php
                 $endDate = new DateTime($unlimitedUntilDate);
                 $now = new DateTime();
                 $daysLeft = $now->diff($endDate)->days;
@@ -127,12 +126,12 @@ catch (Exception $e) {
                 ?>
             </span>
         </div>
-    <?php else: ?>
+    <?php else : ?>
         <div class="entitlement-item credits">
             <span class="entitlement-label">Credits:</span>
-            <span class="entitlement-value"><?php 
+            <span class="entitlement-value"><?php
             // #region agent log
-            file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id'=>'log_'.time().'_display3','timestamp'=>time()*1000,'location'=>'entitlements-display.php:120','message'=>'Displaying credits','data'=>['creditsBalance'=>$creditsBalance],'sessionId'=>'debug-session','runId'=>'run1','hypothesisId'=>'E'])."\n", FILE_APPEND);
+            file_put_contents(__DIR__ . '/../.cursor/debug.log', json_encode(['id' => 'log_' . time() . '_display3','timestamp' => time() * 1000,'location' => 'entitlements-display.php:120','message' => 'Displaying credits','data' => ['creditsBalance' => $creditsBalance],'sessionId' => 'debug-session','runId' => 'run1','hypothesisId' => 'E']) . "\n", FILE_APPEND);
             // #endregion
             echo $creditsBalance; ?></span>
         </div>

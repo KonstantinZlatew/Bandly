@@ -1,22 +1,18 @@
 <?php
+
 // Test database connection and verify table structure
 require_once __DIR__ . "/config/db.php";
-
 echo "<h2>Database Connection Test</h2>";
-
 try {
     $pdo = db();
     echo "<p style='color: green;'>✓ Database connection successful</p>";
-    
-    // Check if tables exist
+// Check if tables exist
     $tables = ['users', 'plans', 'purchases', 'user_entitlements', 'user_subscriptions'];
-    
     foreach ($tables as $table) {
         $stmt = $pdo->query("SHOW TABLES LIKE '$table'");
         if ($stmt->rowCount() > 0) {
             echo "<p style='color: green;'>✓ Table '$table' exists</p>";
-            
-            // Show table structure
+        // Show table structure
             $stmt = $pdo->query("DESCRIBE $table");
             $columns = $stmt->fetchAll();
             echo "<details><summary>Columns in '$table':</summary><pre>";
@@ -28,7 +24,7 @@ try {
             echo "<p style='color: red;'>✗ Table '$table' does NOT exist</p>";
         }
     }
-    
+
     // Check plans
     echo "<h3>Plans in Database:</h3>";
     $stmt = $pdo->query("SELECT id, code, name, plan_type, credits_amount, duration_days, price_cents, is_active FROM plans");
@@ -52,7 +48,7 @@ try {
     } else {
         echo "<p style='color: orange;'>⚠ No plans found in database</p>";
     }
-    
+
     // Test insert into purchases (dry run)
     echo "<h3>Test Purchase Insert (Structure Check):</h3>";
     $testStmt = $pdo->prepare("
@@ -60,8 +56,7 @@ try {
         VALUES (:user_id, :plan_id, 'stripe', :payment_intent_id, :checkout_session_id, :amount_cents, :currency, :status, IF(:status = 'paid', NOW(), NULL))
     ");
     echo "<p style='color: green;'>✓ Purchase INSERT statement is valid</p>";
-    
-    // Test entitlements update
+// Test entitlements update
     echo "<h3>Test Entitlements Update (Structure Check):</h3>";
     $testStmt = $pdo->prepare("
         INSERT INTO user_entitlements (user_id, credits_balance)
@@ -69,13 +64,7 @@ try {
         ON DUPLICATE KEY UPDATE credits_balance = credits_balance + :credits
     ");
     echo "<p style='color: green;'>✓ Entitlements UPDATE statement is valid</p>";
-    
 } catch (Exception $e) {
     echo "<p style='color: red;'><strong>Error:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
     echo "<pre>" . htmlspecialchars($e->getTraceAsString()) . "</pre>";
 }
-?>
-
-
-
-

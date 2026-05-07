@@ -1,20 +1,23 @@
 <?php
+
 /**
  * Cookie-based authentication helper functions
  */
 
 /**
  * Set a cookie with secure defaults
- * @param string $name Cookie name
- * @param string $value Cookie value
- * @param int $expire Expiration time in seconds (default: 1 week)
+ * @param string  $name   Cookie name.
+ * @param string  $value  Cookie value.
+ * @param integer $expire Expiration time in seconds (default: 1 week).
+ * @return void
  */
-function setAuthCookie(string $name, string $value, int $expire = 604800): void {
+function setAuthCookie(string $name, string $value, int $expire = 604800): void
+{
     $expireTime = time() + $expire;
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
     $httponly = true;
     $samesite = 'Lax';
-    
+
     if (PHP_VERSION_ID >= 70300) {
         setcookie($name, $value, [
             'expires' => $expireTime,
@@ -32,20 +35,23 @@ function setAuthCookie(string $name, string $value, int $expire = 604800): void 
 
 /**
  * Get a cookie value
- * @param string $name Cookie name
- * @return string|null Cookie value or null if not set
+ * @param string $name Cookie name.
+ * @return string|null Cookie value or null if not set.
  */
-function getAuthCookie(string $name): ?string {
+function getAuthCookie(string $name): ?string
+{
     return $_COOKIE[$name] ?? null;
 }
 
 /**
  * Delete a cookie
- * @param string $name Cookie name
+ * @param string $name Cookie name.
+ * @return void
  */
-function deleteAuthCookie(string $name): void {
+function deleteAuthCookie(string $name): void
+{
     $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-    
+
     if (PHP_VERSION_ID >= 70300) {
         setcookie($name, '', [
             'expires' => time() - 3600,
@@ -58,25 +64,27 @@ function deleteAuthCookie(string $name): void {
     } else {
         setcookie($name, '', time() - 3600, '/', '', $secure, true);
     }
-    
+
     // Also unset from $_COOKIE array
     unset($_COOKIE[$name]);
 }
 
 /**
  * Set user authentication cookies
- * @param int $userId User ID
- * @param string $username Username
- * @param string $email User email
- * @param int $isAdmin Admin flag (0 or 1)
- * @param string|null $profilePicUrl Profile picture URL (optional)
+ * @param integer     $userId        User ID.
+ * @param string      $username      Username.
+ * @param string      $email         User email.
+ * @param integer     $isAdmin       Admin flag (0 or 1).
+ * @param string|null $profilePicUrl Profile picture URL (optional).
+ * @return void
  */
-function setUserCookies(int $userId, string $username, string $email, int $isAdmin = 0, ?string $profilePicUrl = null): void {
+function setUserCookies(int $userId, string $username, string $email, int $isAdmin = 0, ?string $profilePicUrl = null): void
+{
     setAuthCookie('user_id', (string)$userId);
     setAuthCookie('username', $username);
     setAuthCookie('email', $email);
     setAuthCookie('is_admin', (string)$isAdmin);
-    
+
     if ($profilePicUrl !== null) {
         setAuthCookie('profile_picture_url', $profilePicUrl);
     }
@@ -84,8 +92,10 @@ function setUserCookies(int $userId, string $username, string $email, int $isAdm
 
 /**
  * Clear all user authentication cookies
+ * @return void
  */
-function clearUserCookies(): void {
+function clearUserCookies(): void
+{
     deleteAuthCookie('user_id');
     deleteAuthCookie('username');
     deleteAuthCookie('email');
@@ -95,17 +105,19 @@ function clearUserCookies(): void {
 
 /**
  * Check if user is authenticated
- * @return bool True if user_id cookie exists
+ * @return boolean True if user_id cookie exists
  */
-function isAuthenticated(): bool {
+function isAuthenticated(): bool
+{
     return isset($_COOKIE['user_id']) && !empty($_COOKIE['user_id']);
 }
 
 /**
  * Get authenticated user ID
- * @return int|null User ID or null if not authenticated
+ * @return integer|null User ID or null if not authenticated
  */
-function getUserId(): ?int {
+function getUserId(): ?int
+{
     if (!isAuthenticated()) {
         return null;
     }
@@ -116,7 +128,8 @@ function getUserId(): ?int {
  * Get authenticated username
  * @return string|null Username or null if not authenticated
  */
-function getUsername(): ?string {
+function getUsername(): ?string
+{
     return $_COOKIE['username'] ?? null;
 }
 
@@ -124,15 +137,17 @@ function getUsername(): ?string {
  * Get authenticated user email
  * @return string|null Email or null if not authenticated
  */
-function getEmail(): ?string {
+function getEmail(): ?string
+{
     return $_COOKIE['email'] ?? null;
 }
 
 /**
  * Check if user is admin
- * @return bool True if user is admin
+ * @return boolean True if user is admin
  */
-function isAdmin(): bool {
+function isAdmin(): bool
+{
     return isset($_COOKIE['is_admin']) && $_COOKIE['is_admin'] === '1';
 }
 
@@ -140,19 +155,21 @@ function isAdmin(): bool {
  * Get profile picture URL
  * @return string|null Profile picture URL or null
  */
-function getProfilePictureUrl(): ?string {
+function getProfilePictureUrl(): ?string
+{
     return $_COOKIE['profile_picture_url'] ?? null;
 }
 
 /**
  * Update a specific user cookie (e.g., after profile update)
- * @param string $key Cookie key (username, email, profile_picture_url)
- * @param string $value New value
+ * @param string $key   Cookie key (username, email, profile_picture_url).
+ * @param string $value New value.
+ * @return void
  */
-function updateUserCookie(string $key, string $value): void {
+function updateUserCookie(string $key, string $value): void
+{
     $allowedKeys = ['username', 'email', 'profile_picture_url'];
     if (in_array($key, $allowedKeys, true)) {
         setAuthCookie($key, $value);
     }
 }
-

@@ -3,8 +3,8 @@ require_once __DIR__ . "/config/auth.php";
 require_once __DIR__ . "/config/db.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 $userId = getUserId() ?? 0;
@@ -15,10 +15,10 @@ $speakingSubmissions = [];
 $writingChartData = [];
 $speakingChartData = [];
 try {
-  $pdo = db();
-  
+    $pdo = db();
+
   // Fetch writing submissions
-  $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
     SELECT 
       ws.id,
       ws.task_type,
@@ -36,11 +36,11 @@ try {
     WHERE ws.user_id = ?
     ORDER BY ws.submitted_at DESC
   ");
-  $stmt->execute([$userId]);
-  $submissions = $stmt->fetchAll();
-  
+    $stmt->execute([$userId]);
+    $submissions = $stmt->fetchAll();
+
   // Fetch speaking submissions
-  $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
     SELECT 
       ss.id,
       ss.task_prompt,
@@ -56,39 +56,39 @@ try {
     WHERE ss.user_id = ?
     ORDER BY ss.submitted_at DESC
   ");
-  $stmt->execute([$userId]);
-  $speakingSubmissions = $stmt->fetchAll();
-  
+    $stmt->execute([$userId]);
+    $speakingSubmissions = $stmt->fetchAll();
+
   // Prepare writing chart data (only for completed submissions)
-  foreach ($submissions as $sub) {
-    if ($sub['status'] === 'done' && $sub['analysis_result']) {
-      $result = json_decode($sub['analysis_result'], true);
-      if ($result && isset($result['overall_band'])) {
-        $writingChartData[] = [
-          'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
-          'label' => date('M d', strtotime($sub['submitted_at'])),
-          'score' => (float)$result['overall_band']
-        ];
-      }
+    foreach ($submissions as $sub) {
+        if ($sub['status'] === 'done' && $sub['analysis_result']) {
+            $result = json_decode($sub['analysis_result'], true);
+            if ($result && isset($result['overall_band'])) {
+                $writingChartData[] = [
+                'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
+                'label' => date('M d', strtotime($sub['submitted_at'])),
+                'score' => (float)$result['overall_band']
+                ];
+            }
+        }
     }
-  }
-  
+
   // Prepare speaking chart data (only for completed submissions)
-  foreach ($speakingSubmissions as $sub) {
-    if ($sub['status'] === 'done' && $sub['analysis_result']) {
-      $result = json_decode($sub['analysis_result'], true);
-      if ($result && isset($result['overall_band'])) {
-        $speakingChartData[] = [
-          'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
-          'label' => date('M d', strtotime($sub['submitted_at'])),
-          'score' => (float)$result['overall_band']
-        ];
-      }
+    foreach ($speakingSubmissions as $sub) {
+        if ($sub['status'] === 'done' && $sub['analysis_result']) {
+            $result = json_decode($sub['analysis_result'], true);
+            if ($result && isset($result['overall_band'])) {
+                $speakingChartData[] = [
+                'date' => date('Y-m-d', strtotime($sub['submitted_at'])),
+                'label' => date('M d', strtotime($sub['submitted_at'])),
+                'score' => (float)$result['overall_band']
+                ];
+            }
+        }
     }
-  }
 } catch (Exception $e) {
   // Handle error silently or log it
-  error_log("Error fetching submissions: " . $e->getMessage());
+    error_log("Error fetching submissions: " . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -128,14 +128,14 @@ try {
   <div class="dashboard-section">
     <h2 class="dashboard-title">My Submissions</h2>
     
-    <?php if (count($writingChartData) > 0): ?>
+    <?php if (count($writingChartData) > 0) : ?>
     <!-- Writing Score Chart -->
     <div class="chart-container">
       <canvas id="writingScoreChart"></canvas>
     </div>
     <?php endif; ?>
     
-    <?php if (count($speakingChartData) > 0): ?>
+    <?php if (count($speakingChartData) > 0) : ?>
     <!-- Speaking Score Chart -->
     <div class="chart-container" style="margin-top: 32px;">
       <canvas id="speakingScoreChart"></canvas>
@@ -145,7 +145,7 @@ try {
     <!-- Writing Submissions Table -->
     <div class="submissions-table-container">
       <h3 class="table-section-title">Writing Submissions</h3>
-      <?php if (count($submissions) > 0): ?>
+      <?php if (count($submissions) > 0) : ?>
         <table class="submissions-table writing-submissions-table">
           <thead>
             <tr>
@@ -160,27 +160,27 @@ try {
             </tr>
           </thead>
           <tbody>
-            <?php 
+            <?php
             $writingIndex = 0;
-            foreach ($submissions as $sub): 
-              $result = null;
-              if ($sub['status'] === 'done' && $sub['analysis_result']) {
-                $result = json_decode($sub['analysis_result'], true);
-              }
-              $taskTypeLabel = ucfirst(str_replace('_', ' ', $sub['task_type'] ?? 'Unknown'));
-              if ($sub['exam_type']) {
-                $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
-              }
-              $writingIndex++;
-              $isHidden = $writingIndex > 5 ? 'hidden-row' : '';
-            ?>
+            foreach ($submissions as $sub) :
+                $result = null;
+                if ($sub['status'] === 'done' && $sub['analysis_result']) {
+                    $result = json_decode($sub['analysis_result'], true);
+                }
+                $taskTypeLabel = ucfirst(str_replace('_', ' ', $sub['task_type'] ?? 'Unknown'));
+                if ($sub['exam_type']) {
+                    $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
+                }
+                $writingIndex++;
+                $isHidden = $writingIndex > 5 ? 'hidden-row' : '';
+                ?>
             <tr class="submission-row writing-row <?php echo $isHidden; ?>" data-submission-id="<?php echo htmlspecialchars($sub['id']); ?>" data-submission-type="writing">
               <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($sub['submitted_at']))); ?></td>
               <td><?php echo htmlspecialchars($taskTypeLabel); ?></td>
               <td class="score-cell">
-                <?php if ($result && isset($result['overall_band'])): ?>
+                <?php if ($result && isset($result['overall_band'])) : ?>
                   <span class="band-score"><?php echo htmlspecialchars($result['overall_band']); ?></span>
-                <?php else: ?>
+                <?php else : ?>
                   <span class="status-badge status-<?php echo htmlspecialchars($sub['status']); ?>">
                     <?php echo htmlspecialchars(ucfirst($sub['status'])); ?>
                   </span>
@@ -199,12 +199,12 @@ try {
             <?php endforeach; ?>
           </tbody>
         </table>
-        <?php if (count($submissions) > 5): ?>
+            <?php if (count($submissions) > 5) : ?>
           <div class="show-more-container" style="text-align: center; margin-top: 16px;">
             <button class="show-more-btn" data-table="writing">Show More</button>
           </div>
-        <?php endif; ?>
-      <?php else: ?>
+            <?php endif; ?>
+      <?php else : ?>
         <div class="no-submissions">
           <p>You haven't submitted any essays yet.</p>
           <p>Start practicing by choosing a mode above!</p>
@@ -215,7 +215,7 @@ try {
     <!-- Speaking Submissions Table -->
     <div class="submissions-table-container" style="margin-top: 32px;">
       <h3 class="table-section-title">Speaking Submissions</h3>
-      <?php if (count($speakingSubmissions) > 0): ?>
+      <?php if (count($speakingSubmissions) > 0) : ?>
         <table class="submissions-table speaking-submissions-table">
           <thead>
             <tr>
@@ -230,27 +230,27 @@ try {
             </tr>
           </thead>
           <tbody>
-            <?php 
+            <?php
             $speakingIndex = 0;
-            foreach ($speakingSubmissions as $sub): 
-              $result = null;
-              if ($sub['status'] === 'done' && $sub['analysis_result']) {
-                $result = json_decode($sub['analysis_result'], true);
-              }
-              $taskTypeLabel = 'Speaking Task';
-              if ($sub['exam_type']) {
-                $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
-              }
-              $speakingIndex++;
-              $isHidden = $speakingIndex > 5 ? 'hidden-row' : '';
-            ?>
+            foreach ($speakingSubmissions as $sub) :
+                $result = null;
+                if ($sub['status'] === 'done' && $sub['analysis_result']) {
+                    $result = json_decode($sub['analysis_result'], true);
+                }
+                $taskTypeLabel = 'Speaking Task';
+                if ($sub['exam_type']) {
+                    $taskTypeLabel = ucfirst($sub['exam_type']) . ' Task ' . ($sub['task_number'] ?? '?');
+                }
+                $speakingIndex++;
+                $isHidden = $speakingIndex > 5 ? 'hidden-row' : '';
+                ?>
             <tr class="submission-row speaking-row <?php echo $isHidden; ?>" data-submission-id="<?php echo htmlspecialchars($sub['id']); ?>" data-submission-type="speaking">
               <td><?php echo htmlspecialchars(date('Y-m-d H:i', strtotime($sub['submitted_at']))); ?></td>
               <td><?php echo htmlspecialchars($taskTypeLabel); ?></td>
               <td class="score-cell">
-                <?php if ($result && isset($result['overall_band'])): ?>
+                <?php if ($result && isset($result['overall_band'])) : ?>
                   <span class="band-score"><?php echo htmlspecialchars($result['overall_band']); ?></span>
-                <?php else: ?>
+                <?php else : ?>
                   <span class="status-badge status-<?php echo htmlspecialchars($sub['status']); ?>">
                     <?php echo htmlspecialchars(ucfirst($sub['status'])); ?>
                   </span>
@@ -269,12 +269,12 @@ try {
             <?php endforeach; ?>
           </tbody>
         </table>
-        <?php if (count($speakingSubmissions) > 5): ?>
+            <?php if (count($speakingSubmissions) > 5) : ?>
           <div class="show-more-container" style="text-align: center; margin-top: 16px;">
             <button class="show-more-btn" data-table="speaking">Show More</button>
           </div>
-        <?php endif; ?>
-      <?php else: ?>
+            <?php endif; ?>
+      <?php else : ?>
         <div class="no-submissions">
           <p>You haven't submitted any speaking recordings yet.</p>
           <p>Start practicing by choosing a mode above!</p>
@@ -295,7 +295,7 @@ try {
 
 <script>
 // Writing Chart.js configuration
-<?php if (count($writingChartData) > 0): ?>
+<?php if (count($writingChartData) > 0) : ?>
 const writingChartData = <?php echo json_encode($writingChartData); ?>;
 const writingCtx = document.getElementById('writingScoreChart').getContext('2d');
 new Chart(writingCtx, {
@@ -359,7 +359,7 @@ new Chart(writingCtx, {
 <?php endif; ?>
 
 // Speaking Chart.js configuration
-<?php if (count($speakingChartData) > 0): ?>
+<?php if (count($speakingChartData) > 0) : ?>
 const speakingChartData = <?php echo json_encode($speakingChartData); ?>;
 const speakingCtx = document.getElementById('speakingScoreChart').getContext('2d');
 new Chart(speakingCtx, {

@@ -3,8 +3,8 @@ require_once __DIR__ . "/config/auth.php";
 require_once __DIR__ . "/config/db.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 $type = $_GET["type"] ?? "academic";
@@ -12,13 +12,17 @@ $section = $_GET["section"] ?? "writing";
 $task = $_GET["task"] ?? "1";
 
 // Validate inputs
-if ($type !== "academic" && $type !== "general") $type = "academic";
+if ($type !== "academic" && $type !== "general") {
+    $type = "academic";
+}
 if ($section !== "writing") {
   // For now, only handle writing tasks
-  header("Location: exam.php?type=" . $type);
-  exit;
+    header("Location: exam.php?type=" . $type);
+    exit;
 }
-if ($task !== "1" && $task !== "2") $task = "1";
+if ($task !== "1" && $task !== "2") {
+    $task = "1";
+}
 
 $userId = getUserId() ?? 0;
 $username = getUsername() ?? "User";
@@ -39,9 +43,9 @@ $taskId = null;
 $examVariantId = null;
 $allTasksCompleted = false;
 try {
-  $pdo = db();
+    $pdo = db();
   // Fetch a task that the user hasn't completed yet
-  $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
     SELECT t.id, t.prompt, t.exam_variant_id
     FROM tasks t
     JOIN exam_variants ev ON t.exam_variant_id = ev.id
@@ -57,16 +61,16 @@ try {
     ORDER BY RAND()
     LIMIT 1
   ");
-  $stmt->execute([$task, $type, $userId]);
-  $taskData = $stmt->fetch();
-  
-  if ($taskData) {
-    $prompt = $taskData['prompt'];
-    $taskId = $taskData['id'];
-    $examVariantId = $taskData['exam_variant_id'];
-  } else {
-    // If all tasks are completed, show a message or fetch any task
-    $stmt = $pdo->prepare("
+    $stmt->execute([$task, $type, $userId]);
+    $taskData = $stmt->fetch();
+
+    if ($taskData) {
+        $prompt = $taskData['prompt'];
+        $taskId = $taskData['id'];
+        $examVariantId = $taskData['exam_variant_id'];
+    } else {
+      // If all tasks are completed, show a message or fetch any task
+        $stmt = $pdo->prepare("
       SELECT t.id, t.prompt, t.exam_variant_id
       FROM tasks t
       JOIN exam_variants ev ON t.exam_variant_id = ev.id
@@ -77,20 +81,20 @@ try {
       ORDER BY RAND()
       LIMIT 1
     ");
-    $stmt->execute([$task, $type]);
-    $taskData = $stmt->fetch();
-    
-    if ($taskData) {
-      $prompt = $taskData['prompt'];
-      $taskId = $taskData['id'];
-      $examVariantId = $taskData['exam_variant_id'];
-      $allTasksCompleted = true; // Flag to show message
-    } else {
-      $prompt = "No task found in database. Please add a task prompt.";
+        $stmt->execute([$task, $type]);
+        $taskData = $stmt->fetch();
+
+        if ($taskData) {
+            $prompt = $taskData['prompt'];
+            $taskId = $taskData['id'];
+            $examVariantId = $taskData['exam_variant_id'];
+            $allTasksCompleted = true; // Flag to show message
+        } else {
+            $prompt = "No task found in database. Please add a task prompt.";
+        }
     }
-  }
 } catch (Exception $e) {
-  $prompt = "Error loading task prompt. Please try again later.";
+    $prompt = "Error loading task prompt. Please try again later.";
 }
 
 ?>
@@ -116,9 +120,9 @@ try {
   </div>
 
   <a class="avatar-link" href="profile.php" title="Profile">
-    <?php if ($profilePic): ?>
+    <?php if ($profilePic) : ?>
       <img class="avatar" src="<?php echo htmlspecialchars($profilePic); ?>" alt="Profile picture">
-    <?php else: ?>
+    <?php else : ?>
       <div class="avatar-fallback" style="background: <?php echo htmlspecialchars($bg); ?>;">
         <?php echo htmlspecialchars($initial); ?>
       </div>
@@ -141,13 +145,13 @@ try {
         <div class="prompt-content" id="promptContent">
           <?php echo nl2br(htmlspecialchars($prompt)); ?>
         </div>
-        <?php if ($taskId): ?>
+        <?php if ($taskId) : ?>
           <input type="hidden" id="taskId" value="<?php echo htmlspecialchars($taskId); ?>">
           <input type="hidden" id="examVariantId" value="<?php echo htmlspecialchars($examVariantId ?? ''); ?>">
         <?php endif; ?>
         <input type="hidden" id="taskType" value="<?php echo htmlspecialchars($taskType); ?>">
         <input type="hidden" id="taskPrompt" value="<?php echo htmlspecialchars($prompt); ?>">
-        <?php if (isset($allTasksCompleted) && $allTasksCompleted): ?>
+        <?php if (isset($allTasksCompleted) && $allTasksCompleted) : ?>
           <div class="info-message" style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; color: #856404;">
             You have completed all available tasks for this type. This is a repeated task.
           </div>
@@ -166,7 +170,7 @@ try {
           <span id="wordCount">0</span> words
         </div>
         <!-- Image upload for academic_task_1 -->
-        <?php if ($taskType === 'academic_task_1'): ?>
+        <?php if ($taskType === 'academic_task_1') : ?>
           <div class="image-upload-section" style="margin-top: 15px;">
             <label for="imageUpload" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
               Upload Image (Optional)

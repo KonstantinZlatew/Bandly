@@ -35,7 +35,7 @@ try {
         <div class="page-title">Choose a Plan</div>
         
         <div class="card-grid">
-            <?php foreach ($plans as $plan): ?>
+            <?php foreach ($plans as $plan) : ?>
                 <?php
                 $price = (float)$plan["price_cents"] / 100;
                 $currency = strtoupper($plan["currency"] ?? "EUR");
@@ -46,9 +46,9 @@ try {
                     <button type="submit" class="mode-card" style="cursor: pointer; border: none; text-align: left;">
                         <h2><?php echo htmlspecialchars($plan["name"]); ?></h2>
                         <p>
-                            <?php if ($planType === "credits"): ?>
+                            <?php if ($planType === "credits") : ?>
                                 Get <?php echo htmlspecialchars($plan["name"]); ?> for unlimited practice sessions.
-                            <?php else: ?>
+                            <?php else : ?>
                                 Unlimited access for the subscription period.
                             <?php endif; ?>
                         </p>

@@ -1,18 +1,16 @@
 <?php
+
 // Diagnostic script to check 2FA setup
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
 echo "<h2>2FA Setup Diagnostic</h2>";
-
 // Check database
 echo "<h3>Database Check</h3>";
 try {
     require_once __DIR__ . "/config/db.php";
     $pdo = db();
     echo "✓ Database connection successful<br>";
-    
-    // Check two_factor_codes table
+// Check two_factor_codes table
     $stmt = $pdo->query("SHOW TABLES LIKE 'two_factor_codes'");
     if ($stmt->rowCount() > 0) {
         echo "✓ two_factor_codes table exists<br>";
@@ -20,7 +18,7 @@ try {
         echo "✗ <strong style='color:red'>two_factor_codes table DOES NOT exist</strong><br>";
         echo "→ You need to run the SQL migration: <code>config/two_factor_auth_schema.sql</code><br>";
     }
-    
+
     // Check users table
     $stmt = $pdo->query("SHOW TABLES LIKE 'users'");
     if ($stmt->rowCount() > 0) {
@@ -31,7 +29,6 @@ try {
     } else {
         echo "✗ users table DOES NOT exist<br>";
     }
-    
 } catch (Exception $e) {
     echo "✗ <strong style='color:red'>Database Error:</strong> " . htmlspecialchars($e->getMessage()) . "<br>";
 }
@@ -42,7 +39,6 @@ $envFile = __DIR__ . "/.env";
 if (file_exists($envFile)) {
     echo "✓ .env file exists<br>";
     $envContent = file_get_contents($envFile);
-    
     $requiredVars = ['SMTP_HOST', 'SMTP_USERNAME', 'SMTP_PASSWORD', 'SMTP_PORT'];
     foreach ($requiredVars as $var) {
         if (preg_match("/^{$var}=(.+)$/m", $envContent, $matches)) {
@@ -67,13 +63,12 @@ $vendorAutoload = __DIR__ . "/vendor/autoload.php";
 if (file_exists($vendorAutoload)) {
     echo "✓ vendor/autoload.php exists<br>";
     require_once $vendorAutoload;
-    
     if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
         echo "✓ PHPMailer is installed<br>";
     } else {
         echo "✗ PHPMailer class not found<br>";
     }
-    
+
     if (class_exists('Dotenv\Dotenv')) {
         echo "✓ Dotenv is installed<br>";
     } else {
@@ -93,7 +88,6 @@ $requiredFiles = [
     'api/verify-2fa.php',
     'verify-2fa.html'
 ];
-
 foreach ($requiredFiles as $file) {
     if (file_exists(__DIR__ . "/" . $file)) {
         echo "✓ {$file} exists<br>";

@@ -1,12 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
-
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
+
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -23,8 +32,7 @@ if ($userId === null) {
 
 try {
     $pdo = db();
-    
-    // Get user entitlements
+// Get user entitlements
     $stmt = $pdo->prepare("
         SELECT credits_balance, unlimited_until 
         FROM user_entitlements 
@@ -33,21 +41,19 @@ try {
     ");
     $stmt->execute(["user_id" => $userId]);
     $entitlements = $stmt->fetch();
-    
     if (!$entitlements) {
-        // Create default entitlements if they don't exist
+    // Create default entitlements if they don't exist
         $stmt = $pdo->prepare("
             INSERT INTO user_entitlements (user_id, credits_balance)
             VALUES (:user_id, 0)
         ");
         $stmt->execute(["user_id" => $userId]);
-        
         $entitlements = [
             "credits_balance" => 0,
             "unlimited_until" => null
         ];
     }
-    
+
     // Get active subscription if exists
     $stmt = $pdo->prepare("
         SELECT us.current_period_end, p.name as plan_name
@@ -60,16 +66,13 @@ try {
     ");
     $stmt->execute(["user_id" => $userId]);
     $subscription = $stmt->fetch();
-    
     $creditsBalance = (int)($entitlements["credits_balance"] ?? 0);
     $unlimitedUntil = $entitlements["unlimited_until"] ?? null;
     $subscriptionEnd = $subscription["current_period_end"] ?? null;
     $planName = $subscription["plan_name"] ?? null;
-    
-    // Use subscription end date if available, otherwise use unlimited_until
+// Use subscription end date if available, otherwise use unlimited_until
     $hasUnlimited = false;
     $unlimitedUntilDate = null;
-    
     if ($subscriptionEnd) {
         $hasUnlimited = true;
         $unlimitedUntilDate = $subscriptionEnd;
@@ -81,7 +84,7 @@ try {
             $unlimitedUntilDate = $unlimitedUntil;
         }
     }
-    
+
     json_response(200, [
         "ok" => true,
         "credits_balance" => $creditsBalance,
@@ -92,5 +95,3 @@ try {
 } catch (PDOException $e) {
     json_response(500, ["ok" => false, "error" => "Server error"]);
 }
-
-

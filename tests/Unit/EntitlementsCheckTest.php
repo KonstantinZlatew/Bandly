@@ -15,26 +15,26 @@ class EntitlementsCheckTest extends TestCase
     public function testCheckCanAnalyzeWithNullUserId(): void
     {
         $result = checkCanAnalyze(null);
-        
+
         $this->assertIsArray($result);
         $this->assertFalse($result['can_analyze']);
         $this->assertEquals('User not authenticated', $result['reason']);
         $this->assertFalse($result['has_subscription']);
         $this->assertEquals(0, $result['credits_remaining']);
     }
-    
+
     /**
      * Test checkCanAnalyze with zero user ID
      */
     public function testCheckCanAnalyzeWithZeroUserId(): void
     {
         $result = checkCanAnalyze(0);
-        
+
         $this->assertIsArray($result);
         $this->assertFalse($result['can_analyze']);
         $this->assertEquals('User not authenticated', $result['reason']);
     }
-    
+
     /**
      * Test that checkCanAnalyze returns correct structure
      */
@@ -42,7 +42,7 @@ class EntitlementsCheckTest extends TestCase
     {
         // This test will fail if database is not available, but tests structure
         $result = checkCanAnalyze(999999);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('can_analyze', $result);
         $this->assertArrayHasKey('reason', $result);
@@ -54,4 +54,3 @@ class EntitlementsCheckTest extends TestCase
         $this->assertIsInt($result['credits_remaining']);
     }
 }
-

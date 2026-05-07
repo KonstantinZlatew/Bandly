@@ -1,12 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
-
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../config/auth.php";
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
+
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -23,8 +32,7 @@ if ($userId === null) {
 
 try {
     $pdo = db();
-    
-    // Check for active subscription
+// Check for active subscription
     $stmt = $pdo->prepare("
         SELECT us.id, us.current_period_end, p.name as plan_name, p.code as plan_code
         FROM user_subscriptions us
@@ -36,12 +44,10 @@ try {
     ");
     $stmt->execute(["user_id" => $userId]);
     $subscription = $stmt->fetch(PDO::FETCH_ASSOC);
-    
     if ($subscription) {
-        // Check if subscription is still valid (not expired)
+    // Check if subscription is still valid (not expired)
         $endDate = new DateTime($subscription["current_period_end"]);
         $now = new DateTime();
-        
         if ($endDate > $now) {
             json_response(200, [
                 "ok" => true,
@@ -51,7 +57,7 @@ try {
                 "expires_at" => $subscription["current_period_end"]
             ]);
         } else {
-            // Subscription expired
+        // Subscription expired
             json_response(200, [
                 "ok" => true,
                 "has_subscription" => false
@@ -66,5 +72,3 @@ try {
 } catch (PDOException $e) {
     json_response(500, ["ok" => false, "error" => "Server error"]);
 }
-
-

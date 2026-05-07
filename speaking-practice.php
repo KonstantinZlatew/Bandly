@@ -4,8 +4,8 @@ require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/entitlements-check.php";
 
 if (!isAuthenticated()) {
-  header("Location: login.html");
-  exit;
+    header("Location: login.html");
+    exit;
 }
 
 $type = $_GET["type"] ?? "academic";
@@ -13,10 +13,12 @@ $section = $_GET["section"] ?? "speaking";
 $part = $_GET["part"] ?? "2";
 
 // Validate inputs
-if ($type !== "academic" && $type !== "general") $type = "academic";
+if ($type !== "academic" && $type !== "general") {
+    $type = "academic";
+}
 if ($section !== "speaking" || $part !== "2") {
-  header("Location: exam.php?type=" . $type);
-  exit;
+    header("Location: exam.php?type=" . $type);
+    exit;
 }
 
 $userId = getUserId() ?? 0;
@@ -33,9 +35,9 @@ $taskId = null;
 $examVariantId = null;
 $allTasksSeen = false;
 try {
-  $pdo = db();
+    $pdo = db();
   // Fetch a task that the user hasn't seen yet
-  $stmt = $pdo->prepare("
+    $stmt = $pdo->prepare("
     SELECT t.id, t.prompt, t.exam_variant_id
     FROM tasks t
     JOIN exam_variants ev ON t.exam_variant_id = ev.id
@@ -51,16 +53,16 @@ try {
     ORDER BY RAND()
     LIMIT 1
   ");
-  $stmt->execute([$type, $userId]);
-  $taskData = $stmt->fetch();
-  
-  if ($taskData) {
-    $prompt = $taskData['prompt'];
-    $taskId = $taskData['id'];
-    $examVariantId = $taskData['exam_variant_id'];
-  } else {
-    // If all tasks are seen, fetch any task
-    $stmt = $pdo->prepare("
+    $stmt->execute([$type, $userId]);
+    $taskData = $stmt->fetch();
+
+    if ($taskData) {
+        $prompt = $taskData['prompt'];
+        $taskId = $taskData['id'];
+        $examVariantId = $taskData['exam_variant_id'];
+    } else {
+      // If all tasks are seen, fetch any task
+        $stmt = $pdo->prepare("
       SELECT t.id, t.prompt, t.exam_variant_id
       FROM tasks t
       JOIN exam_variants ev ON t.exam_variant_id = ev.id
@@ -71,20 +73,20 @@ try {
       ORDER BY RAND()
       LIMIT 1
     ");
-    $stmt->execute([$type]);
-    $taskData = $stmt->fetch();
-    
-    if ($taskData) {
-      $prompt = $taskData['prompt'];
-      $taskId = $taskData['id'];
-      $examVariantId = $taskData['exam_variant_id'];
-      $allTasksSeen = true; // Flag to show message
-    } else {
-      $prompt = "No speaking task found in database. Please add a task prompt.";
+        $stmt->execute([$type]);
+        $taskData = $stmt->fetch();
+
+        if ($taskData) {
+            $prompt = $taskData['prompt'];
+            $taskId = $taskData['id'];
+            $examVariantId = $taskData['exam_variant_id'];
+            $allTasksSeen = true; // Flag to show message
+        } else {
+            $prompt = "No speaking task found in database. Please add a task prompt.";
+        }
     }
-  }
 } catch (Exception $e) {
-  $prompt = "Error loading task prompt. Please try again later.";
+    $prompt = "Error loading task prompt. Please try again later.";
 }
 
 ?>
@@ -117,13 +119,13 @@ try {
           <div class="prompt-content" id="promptContent">
             <?php echo nl2br(htmlspecialchars($prompt)); ?>
           </div>
-          <?php if ($taskId): ?>
+          <?php if ($taskId) : ?>
             <input type="hidden" id="taskId" value="<?php echo htmlspecialchars($taskId); ?>">
             <input type="hidden" id="examVariantId" value="<?php echo htmlspecialchars($examVariantId ?? ''); ?>">
           <?php endif; ?>
           <input type="hidden" id="taskType" value="speaking">
           <input type="hidden" id="taskPrompt" value="<?php echo htmlspecialchars($prompt); ?>">
-          <?php if (isset($allTasksSeen) && $allTasksSeen): ?>
+          <?php if (isset($allTasksSeen) && $allTasksSeen) : ?>
             <div class="info-message" style="margin-top: 15px; padding: 10px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; color: #856404;">
               You have seen all available tasks for this type. This is a repeated task.
             </div>
@@ -166,12 +168,12 @@ try {
         <div class="results-placeholder">
           <p>Record your response to see analysis results here.</p>
           <p>You have 1-2 minutes to speak.</p>
-          <?php if (!$entitlementCheck['can_analyze']): ?>
+          <?php if (!$entitlementCheck['can_analyze']) : ?>
             <div class="warning-message" style="margin-top: 15px; padding: 12px; background: #f8d7da; border-left: 4px solid #dc3545; border-radius: 4px; color: #721c24;">
               <strong>Note:</strong> <?php echo htmlspecialchars($entitlementCheck['reason']); ?>
               <br><a href="payment.php" style="color: #c40000; text-decoration: underline;">Purchase credits or subscription</a>
             </div>
-          <?php elseif (!$entitlementCheck['has_subscription']): ?>
+          <?php elseif (!$entitlementCheck['has_subscription']) : ?>
             <div class="info-message" style="margin-top: 15px; padding: 12px; background: #d1ecf1; border-left: 4px solid #0c5460; border-radius: 4px; color: #0c5460;">
               <strong>Credits:</strong> You have <?php echo $entitlementCheck['credits_remaining']; ?> credit(s) remaining.
               <br>One credit will be deducted when you analyze your recording.

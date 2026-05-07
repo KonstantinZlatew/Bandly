@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 header("Content-Type: application/json; charset=utf-8");
@@ -10,7 +11,15 @@ if (!function_exists('db')) {
     throw new RuntimeException("Database function 'db' not found. Check config/db.php");
 }
 
-function json_response(int $code, array $payload): void {
+/**
+ * Send JSON response and exit.
+ *
+ * @param integer $code    HTTP status code.
+ * @param array   $payload Response data.
+ * @return void
+ */
+function json_response(int $code, array $payload): void
+{
     http_response_code($code);
     echo json_encode($payload, JSON_UNESCAPED_UNICODE);
     exit;
@@ -103,7 +112,7 @@ try {
     // Send 2FA code instead of directly logging in
     require_once __DIR__ . "/../config/two_factor.php";
     $result = send2FAVerification($userId, $email);
-    
+
     if (!$result['success']) {
         // User is created but 2FA failed - they can still login later
         json_response(201, [
@@ -127,7 +136,7 @@ try {
         'email' => $email,
         'is_admin' => 0
     ];
-    
+
     // Store in database temporarily
     $stmt = $pdo->prepare("
         INSERT INTO two_factor_codes (user_id, email, code, expires_at)
@@ -139,7 +148,7 @@ try {
         "code" => base64_encode(json_encode($userData)),
         "expires_at" => date('Y-m-d H:i:s', time() + 900) // 15 minutes
     ]);
-    
+
     // Set temporary cookie with token
     setcookie('2fa_token', $tempToken, time() + 900, '/', '', isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on', true);
 

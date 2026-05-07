@@ -16,11 +16,11 @@ class ValidationTest extends TestCase
     {
         $validEmail = 'test@example.com';
         $invalidEmail = 'not-an-email';
-        
+
         $this->assertTrue(filter_var($validEmail, FILTER_VALIDATE_EMAIL) !== false);
         $this->assertFalse(filter_var($invalidEmail, FILTER_VALIDATE_EMAIL) !== false);
     }
-    
+
     /**
      * Test integer validation
      */
@@ -28,13 +28,13 @@ class ValidationTest extends TestCase
     {
         $validInt = 123;
         $invalidInt = 'abc';
-        
+
         $this->assertTrue(is_int($validInt));
         $this->assertFalse(is_int($invalidInt));
         $this->assertTrue(filter_var($validInt, FILTER_VALIDATE_INT) !== false);
         $this->assertFalse(filter_var($invalidInt, FILTER_VALIDATE_INT) !== false);
     }
-    
+
     /**
      * Test string sanitization
      */
@@ -42,11 +42,11 @@ class ValidationTest extends TestCase
     {
         $input = '<script>alert("xss")</script>';
         $sanitized = htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
-        
+
         $this->assertStringNotContainsString('<script>', $sanitized);
         $this->assertStringContainsString('&lt;', $sanitized);
     }
-    
+
     /**
      * Test array structure validation
      */
@@ -59,12 +59,12 @@ class ValidationTest extends TestCase
             'has_subscription' => false,
             'credits_remaining' => 5
         ];
-        
+
         foreach ($requiredKeys as $key) {
             $this->assertArrayHasKey($key, $testArray);
         }
     }
-    
+
     /**
      * Test null and empty checks
      */
@@ -74,7 +74,7 @@ class ValidationTest extends TestCase
         $emptyString = '';
         $zero = 0;
         $falseValue = false;
-        
+
         $this->assertTrue(is_null($nullValue));
         $this->assertTrue(empty($emptyString));
         $this->assertTrue(empty($zero));
@@ -83,4 +83,3 @@ class ValidationTest extends TestCase
         $this->assertFalse(empty(1));
     }
 }
-
