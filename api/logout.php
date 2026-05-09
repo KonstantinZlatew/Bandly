@@ -1,6 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types=1)
+
+// intentional syntax error: missing semicolon above
 
 header("Content-Type: application/json; charset=utf-8");
 require_once __DIR__ . "/../config/auth.php";
