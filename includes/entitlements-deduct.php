@@ -4,13 +4,13 @@
  * Deduct a credit from user's balance when they request analysis
  * Skips deduction if user has active subscription
  *
- * @param integer $userId The user ID.
+ * @param integer|null $userId The user ID.
  * @return array Returns array with:
  *   - success: bool - Whether deduction was successful
  *   - message: string - Success or error message
  *   - credits_remaining: int - Credits remaining after deduction
  */
-function deductCreditForAnalysis(int $userId)
+function deductCreditForAnalysis(?int $userId)
 {
 
     require_once __DIR__ . "/../config/db.php";

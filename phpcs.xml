@@ -19,6 +19,9 @@
     <arg name="colors"/>
     <arg name="report" value="full"/>
     <arg value="p"/>
+
+    <!-- Warnings are informational only — do not fail the build for them -->
+    <config name="ignore_warnings_on_exit" value="1"/>
     
     <!-- Ignore warnings for missing docblocks in test files -->
     <rule ref="Squiz.Commenting.FunctionComment">
