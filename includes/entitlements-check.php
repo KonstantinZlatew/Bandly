@@ -3,14 +3,14 @@
 /**
  * Check if a user can analyze a submission (speaking or writing) (wheather he has subscription or credits)
  *
- * @param integer $userId The user ID to check.
+ * @param integer|null $userId The user ID to check.
  * @return array Returns array with:
  *   - can_analyze: bool - Whether user can analyze
  *   - reason: string - Reason if cannot analyze
  *   - has_subscription: bool - Whether user has active subscription
  *   - credits_remaining: int - Number of credits remaining (0 if subscription)
  */
-function checkCanAnalyze(int $userId)
+function checkCanAnalyze(?int $userId)
 {
 
     require_once __DIR__ . "/../config/db.php";
