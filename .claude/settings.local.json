@@ -9,7 +9,20 @@
       "Bash(vendor/bin/phpcs api/stripe-webhook.php)",
       "Bash(echo \"Exit code: $?\")",
       "Bash(vendor/bin/phpunit)",
-      "Bash(echo \"phpcs exit: $?\")"
+      "Bash(echo \"phpcs exit: $?\")",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git fetch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(vendor/bin/phpunit --no-coverage)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(vendor/bin/phpcs --report=summary)",
+      "Bash(vendor/bin/phpcs speaking-worker.php)",
+      "Bash(git branch *)",
+      "Bash(python -c ' *)",
+      "Bash(vendor/bin/phpcs api/logout.php)"
     ]
   }
 }
