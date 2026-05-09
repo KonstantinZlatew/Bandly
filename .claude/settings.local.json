@@ -22,7 +22,9 @@
       "Bash(vendor/bin/phpcs speaking-worker.php)",
       "Bash(git branch *)",
       "Bash(python -c ' *)",
-      "Bash(vendor/bin/phpcs api/logout.php)"
+      "Bash(vendor/bin/phpcs api/logout.php)",
+      "Bash(echo \"---exit: $?\")",
+      "Bash(grep -n '?int\\\\|int $userId' includes/entitlements-check.php includes/entitlements-deduct.php)"
     ]
   }
 }
