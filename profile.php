@@ -50,10 +50,6 @@ if (!isAuthenticated()) {
         <button class="btn-dark" id="changePicBtn" type="button" disabled>Change profile picture</button>
         <button class="btn-danger" id="logoutBtn" type="button" disabled>Logout</button>
       </div>
-
-      <div class="profile-note">
-        Preferences are UI-only for now.
-      </div>
     </section>
 
     <section class="details-card">
@@ -92,24 +88,6 @@ if (!isAuthenticated()) {
         <div class="field">
           <div class="label">Created at</div>
           <div class="value" id="v_created_at">—</div>
-        </div>
-      </div>
-
-      <h2 class="section-title">Preferences</h2>
-      <div class="prefs-row">
-        <div class="pref-box">
-          <div class="label">Theme</div>
-          <div class="value">Light</div>
-        </div>
-
-        <div class="pref-box">
-          <div class="label">Notifications</div>
-          <div class="value">Enabled</div>
-        </div>
-
-        <div class="pref-box">
-          <div class="label">Default exam</div>
-          <div class="value">Academic</div>
         </div>
       </div>
     </section>

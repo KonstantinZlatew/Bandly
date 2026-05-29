@@ -1,4 +1,11 @@
 {
     "$schema": "C:\\Users\\kzlat\\.cursor\\extensions\\phpactor.vscode-phpactor-1.7.6-universal\\vendor\\phpactor\\phpactor/phpactor.schema.json",
-    "php_code_sniffer.enabled": false
+    "php_code_sniffer.enabled": false,
+    "autoload": {
+        "files": [
+            "config/auth.php",
+            "config/db.php",
+            "includes/entitlements-check.php"
+        ]
+    }
 }

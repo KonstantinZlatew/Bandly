@@ -1,0 +1,21 @@
+Here is every command that needs to be ran in order for the project to start:
+
+* Stripe:
+1) ensure that the "stripe listen" command returns a secret the same as the STRIPE_WEBHOOK_SECRET in the .env
+2) run this command for stripe to run locally: stripe listen --forward-to http://localhost/IELTS-AI-Evaluator/api/stripe-webhook.php
+
+*writing task: (in bash)
+1) go to right folder: cd ai_service
+2) activate script: venv/Scripts/activate
+3) load app: uvicorn app.main:app --port 8000 --reload
+*start worker:
+ - in folder C:\xampp\htdocs\IELTS-AI-Evaluator start the worker with:
+    php worker.php --daemon
+
+*speaking task: (in bash)
+1) cd .\speaking_service\
+2) activate script: venv/Scripts/activate
+3) run: python -m uvicorn app.main:app --port 8001 --reload
+*speaking worker:
+ - in folder C:\xampp\htdocs\IELTS-AI-Evaluator start the worker with:
+    php speaking-worker.php --daemon

@@ -1,31 +1,43 @@
 <?xml version="1.0"?>
 <ruleset name="IELTS-AI-Evaluator">
     <description>Coding standard for IELTS-AI-Evaluator project</description>
-    
-    <!-- Include the whole project -->
+
+    <!-- Scan only PHP files in the project root -->
     <file>.</file>
-    
-    <!-- Exclude vendor and other directories -->
+
+    <!-- Ignore non-PHP files — PHPCS does not understand JS/CSS syntax -->
+    <exclude-pattern>*.js</exclude-pattern>
+    <exclude-pattern>*.css</exclude-pattern>
+    <exclude-pattern>*.json</exclude-pattern>
+    <exclude-pattern>*.html</exclude-pattern>
+
+    <!-- Ignore generated / third-party directories -->
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>node_modules/*</exclude-pattern>
     <exclude-pattern>uploads/*</exclude-pattern>
-    <exclude-pattern>*.min.js</exclude-pattern>
-    <exclude-pattern>*.min.css</exclude-pattern>
-    
-    <!-- Use PSR12 coding standard -->
+    <exclude-pattern>coverage/*</exclude-pattern>
+    <exclude-pattern>logs/*</exclude-pattern>
+    <exclude-pattern>.cursor/*</exclude-pattern>
+
+    <!-- Ignore one-off debug/test scripts that aren't part of the application -->
+    <exclude-pattern>test-*.php</exclude-pattern>
+    <exclude-pattern>debug-*.php</exclude-pattern>
+    <exclude-pattern>fix-*.php</exclude-pattern>
+    <exclude-pattern>diagnose-*.php</exclude-pattern>
+
+    <!-- Use PSR-12 coding standard -->
     <rule ref="PSR12"/>
-    
-    <!-- Show progress -->
+
+    <!-- Display options -->
     <arg name="colors"/>
     <arg name="report" value="full"/>
     <arg value="p"/>
 
-    <!-- Warnings are informational only — do not fail the build for them -->
+    <!-- Warnings are informational only — do not fail the build -->
     <config name="ignore_warnings_on_exit" value="1"/>
-    
-    <!-- Ignore warnings for missing docblocks in test files -->
+
+    <!-- Relax docblock requirement for test files -->
     <rule ref="Squiz.Commenting.FunctionComment">
         <exclude-pattern>tests/*</exclude-pattern>
     </rule>
 </ruleset>
-

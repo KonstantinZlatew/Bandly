@@ -42,7 +42,7 @@ form.addEventListener("submit", async function (e) {
           // Store email for display on 2FA page
             localStorage.setItem('2fa_email', data.email || email);
           // Redirect to 2FA verification page
-            window.location.href = `verify - 2fa.html ? email = ${encodeURIComponent(data.email || email)}`;
+            window.location.href = `verify-2fa.html?email=${encodeURIComponent(data.email || email)}`;
         } else {
           // Redirect to homepage if 2FA is not required (shouldn't happen with new flow)
             window.location.href = "index.php";

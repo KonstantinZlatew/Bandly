@@ -9,6 +9,20 @@ if (!isAuthenticated()) {
 
 $userId = getUserId() ?? 0;
 
+// ── Stripe success-redirect fulfillment ───────────────────────────────────
+// Stripe cannot POST webhooks to localhost, so we verify the session here
+// on the redirect back. The helper is idempotent (skips already-processed
+// sessions), so it's also safe when a real webhook has already fired.
+if (
+    isset($_GET['payment'], $_GET['session_id'])
+    && $_GET['payment'] === 'success'
+    && str_starts_with((string)$_GET['session_id'], 'cs_')
+) {
+    require_once __DIR__ . '/includes/process-payment-success.php';
+    processPaymentSuccess($userId, (string)$_GET['session_id']);
+}
+// ─────────────────────────────────────────────────────────────────────────
+
 // Fetch user submissions
 $submissions = [];
 $speakingSubmissions = [];

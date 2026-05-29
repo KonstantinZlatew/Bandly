@@ -347,8 +347,11 @@ function startPolling(submissionId) {
         document.getElementById('analyzeBtn').disabled = false;
         document.getElementById('analyzeBtn').textContent = 'Analyze';
       } else if (submission.status === 'processing') {
-        document.getElementById('resultsContent').innerHTML = 
-          '<div class="processing-message"><p>Processing your essay... Please wait.</p></div>';
+        document.getElementById('resultsContent').innerHTML =
+          '<div class="processing-message"><p>Analysing your essay... Please wait.</p></div>';
+      } else if (submission.status === 'pending') {
+        document.getElementById('resultsContent').innerHTML =
+          '<div class="processing-message"><p>Essay queued — waiting for the worker to pick it up...</p></div>';
       }
     } catch (error) {
       console.error('Polling error:', error);
