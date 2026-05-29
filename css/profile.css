@@ -124,10 +124,12 @@
     border-top: 6px solid #c40000;
     box-shadow: 0 10px 25px rgba(0,0,0,0.10);
     padding: 26px;
+    display: flex;
+    flex-direction: column;
   }
 
   .section-title {
-    margin: 0 0 14px 0;
+    margin: 0 0 18px 0;
     font-size: 18px;
     font-weight: 700;
     color: #111;
@@ -136,40 +138,32 @@
   .details-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px 18px;
-    margin-bottom: 26px;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    flex: 1;
+    align-content: stretch;
   }
 
   .field {
     background: #f7f7f7;
     border: 1px solid #eee;
     border-radius: 10px;
-    padding: 12px 14px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .label {
-    font-size: 12px;
+    font-size: 13px;
     color: #666;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 
   .value {
-    font-size: 14px;
+    font-size: 17px;
     color: #111;
     font-weight: 600;
-  }
-
-  .prefs-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .pref-box {
-    background: #f7f7f7;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 12px 14px;
   }
 
   /* Responsive */
@@ -192,7 +186,7 @@
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #ccc;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .input:focus {

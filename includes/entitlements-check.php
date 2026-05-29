@@ -1,6 +1,102 @@
 <?php
 
 /**
+ * Load credits and subscription summary for display/API.
+ *
+ * @param integer|null $userId The user ID to load.
+ * @return array{
+ *   credits_balance: int,
+ *   has_unlimited: bool,
+ *   unlimited_until: string|null,
+ *   plan_name: string|null
+ * }
+ */
+function getEntitlementsSummary(?int $userId): array
+{
+    require_once __DIR__ . "/../config/db.php";
+
+    $summary = [
+        'credits_balance' => 0,
+        'has_unlimited' => false,
+        'unlimited_until' => null,
+        'plan_name' => null,
+    ];
+
+    if (!$userId) {
+        return $summary;
+    }
+
+    try {
+        $pdo = db();
+
+        $stmt = $pdo->prepare("
+            SELECT credits_balance, unlimited_until
+            FROM user_entitlements
+            WHERE user_id = :user_id
+            LIMIT 1
+        ");
+        $stmt->execute(["user_id" => $userId]);
+        $entitlements = $stmt->fetch();
+
+        if (!$entitlements) {
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_entitlements (user_id, credits_balance)
+                    VALUES (:user_id, 0)
+                ");
+                $stmt->execute(["user_id" => $userId]);
+            } catch (PDOException $e) {
+                $stmt = $pdo->prepare("
+                    SELECT credits_balance, unlimited_until
+                    FROM user_entitlements
+                    WHERE user_id = :user_id
+                    LIMIT 1
+                ");
+                $stmt->execute(["user_id" => $userId]);
+                $entitlements = $stmt->fetch();
+            }
+        }
+
+        $creditsBalance = (int)($entitlements["credits_balance"] ?? 0);
+        $unlimitedUntil = $entitlements["unlimited_until"] ?? null;
+        $summary['credits_balance'] = $creditsBalance;
+
+        $stmt = $pdo->prepare("
+            SELECT us.current_period_end, p.name as plan_name
+            FROM user_subscriptions us
+            JOIN plans p ON p.id = us.plan_id
+            WHERE us.user_id = :user_id
+            AND us.status IN ('active', 'trialing')
+            AND (us.current_period_end IS NULL OR us.current_period_end > NOW())
+            ORDER BY us.current_period_end DESC
+            LIMIT 1
+        ");
+        $stmt->execute(["user_id" => $userId]);
+        $subscription = $stmt->fetch();
+
+        if ($subscription) {
+            $summary['has_unlimited'] = true;
+            $summary['unlimited_until'] = $subscription["current_period_end"];
+            $summary['plan_name'] = $subscription["plan_name"];
+            return $summary;
+        }
+
+        if ($unlimitedUntil) {
+            $unlimitedDate = new DateTime($unlimitedUntil);
+            $now = new DateTime();
+            if ($unlimitedDate > $now) {
+                $summary['has_unlimited'] = true;
+                $summary['unlimited_until'] = $unlimitedUntil;
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Entitlements summary error: " . $e->getMessage());
+    }
+
+    return $summary;
+}
+
+/**
  * Check if a user can analyze a submission (speaking or writing) (wheather he has subscription or credits)
  *
  * @param integer|null $userId The user ID to check.

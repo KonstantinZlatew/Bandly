@@ -15,7 +15,12 @@
       "Bash(git pull *)",
       "Bash(git fetch *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(dir /b C:\\\\xampp\\\\htdocs\\\\IELTS-AI-Evaluator\\\\*.php)",
+      "Bash(php *)",
+      "Bash(grep \"\\\\.php$\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":8001\")"
     ]
   }
 }
