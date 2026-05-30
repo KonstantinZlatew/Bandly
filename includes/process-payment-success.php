@@ -14,7 +14,7 @@ declare(strict_types=1);
  * Idempotent: checks provider_checkout_session_id before inserting
  * a purchase, so running this twice for the same session is safe.
  *
- * @param int    $userId    The logged-in user's ID.
+ * @param integer    $userId    The logged-in user's ID.
  * @param string $sessionId The Stripe checkout session ID (cs_xxx).
  * @return void
  */
