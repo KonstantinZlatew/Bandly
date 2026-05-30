@@ -20,7 +20,8 @@
       "Bash(php *)",
       "Bash(grep \"\\\\.php$\")",
       "Bash(netstat -ano)",
-      "Bash(findstr \":8001\")"
+      "Bash(findstr \":8001\")",
+      "Bash(dir \"C:/xampp/htdocs/IELTS-AI-Evaluator/homepage-image*\")"
     ]
   }
 }
