@@ -113,11 +113,39 @@ try {
   <title>Home</title>
   <link rel="stylesheet" href="css/home.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/hero.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
 <?php require_once __DIR__ . "/includes/navbar.php"; ?>
+
+<!-- ── Hero ──────────────────────────────────────────────── -->
+<section class="hero">
+  <img
+    src="homepage-image.png?v=3"
+    alt="Students studying together on a university campus"
+    class="hero-img"
+  >
+  <div class="hero-overlay"></div>
+  <div class="hero-vignette"></div>
+
+  <div class="hero-content">
+    <span class="hero-eyebrow">AI-Powered IELTS Evaluation</span>
+    <h1 class="hero-brand">Bandly<span class="hero-brand-dot">.</span></h1>
+    <p class="hero-slogan">Score higher.<br><em>Together.</em></p>
+    <p class="hero-sub">
+      Instant AI feedback on your writing and speaking — calibrated to
+      real IELTS band descriptors so you always know exactly where you stand.
+    </p>
+  </div>
+
+  <div class="hero-scroll">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    Scroll
+  </div>
+</section>
+<!-- ─────────────────────────────────────────────────────── -->
 
 <?php require_once __DIR__ . "/includes/entitlements-display.php"; ?>
 
