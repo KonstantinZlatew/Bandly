@@ -37,7 +37,9 @@
       "Bash(vendor/bin/phpcs admin/index.php api/admin/upload-task-image.php api/login.php api/submission-save.php worker.php practice.php)",
       "Read(//c/xampp/mysql/bin/**)",
       "Bash(./mysql.exe -u root -e \"SELECT id, LEFT\\(prompt, 60\\) as prompt_preview FROM ielts_evalai.tasks t JOIN ielts_evalai.exam_variants ev ON t.exam_variant_id = ev.id JOIN ielts_evalai.exams e ON ev.exam_id = e.id WHERE t.task_type = 'writing' AND t.task_number = 1 AND e.exam_type = 'academic' ORDER BY t.id ASC;\")",
-      "Bash(C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe *)"
+      "Bash(C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe *)",
+      "Bash(C:\\\\xampp\\\\php\\\\php.exe *)",
+      "WebSearch"
     ]
   }
 }
