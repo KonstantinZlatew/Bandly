@@ -53,13 +53,13 @@ $title = ($type === "general") ? "IELTS General" : "IELTS Academic";
       <div class="badge">speaking</div>
     </a>
 
-    <a class="section-card" href="practice.php?type=<?php echo $type; ?>&section=reading">
+    <a class="section-card" href="reading.php">
       <h3>Reading</h3>
       <p><?php echo ($type === "academic") ? "Academic passages." : "General training texts."; ?></p>
       <div class="badge"><?php echo $type; ?></div>
     </a>
 
-    <a class="section-card" href="practice.php?type=<?php echo $type; ?>&section=listening">
+    <a class="section-card" href="listening.php">
       <h3>Listening</h3>
       <p>Sections 1–4 (same format for both).</p>
       <div class="badge">listening</div>

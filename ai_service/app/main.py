@@ -384,9 +384,16 @@ BEFORE RETURNING, CHECK:
         print("MODEL_RAW:", content)
         data = json.loads(content)
 
-        for k in ["TR", "CC", "LR", "GRA", "notes", "overall_comment", "improvement_plan"]:
+        for k in ["TR", "CC", "LR", "GRA", "notes", "overall_comment"]:
             if k not in data:
                 raise ValueError(f"Missing key: {k}")
+
+        if "improvement_plan" not in data:
+            data["improvement_plan"] = [
+                "Review the task requirements and ensure all key features are covered.",
+                "Practise organising your response with a clear overview and supporting details.",
+                "Expand vocabulary range and review grammar accuracy.",
+            ]
 
         tr = float(data["TR"])
         cc = float(data["CC"])
@@ -509,9 +516,11 @@ async def evaluate(request: Request):
                 image_url=req.image_url,
                 image_base64=req.image_base64 if not image_data else None,
             )
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid JSON request: {str(e)}")
-    
+
     else:
         # Handle form-data request (for file uploads)
         # Note: For proper file upload handling, clients should use multipart/form-data
@@ -545,6 +554,7 @@ async def evaluate(request: Request):
             raise
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid form data: {str(e)}")
+
 
 
 @app.post("/evaluate-form")

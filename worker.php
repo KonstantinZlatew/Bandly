@@ -67,18 +67,18 @@ function fetchNextJob(PDO $pdo): ?array
     // SELECT ... FOR UPDATE locks the row for this transaction
         // Only fetch jobs with valid task_type and task_prompt
         $stmt = $pdo->prepare("
-            SELECT 
+            SELECT
                 ws.id,
                 ws.user_id,
                 ws.task_id,
                 ws.content,
                 ws.task_prompt,
                 ws.task_type,
-                ws.image_file_id,
                 f.storage_key as image_path,
                 ws.word_count
             FROM writing_submissions ws
-            LEFT JOIN files f ON ws.image_file_id = f.id
+            LEFT JOIN tasks t ON ws.task_id = t.id
+            LEFT JOIN files f ON t.image_file_id = f.id
             WHERE ws.status = 'pending'
             AND ws.task_type IS NOT NULL
             AND ws.task_type != ''

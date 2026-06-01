@@ -21,7 +21,25 @@
       "Bash(grep \"\\\\.php$\")",
       "Bash(netstat -ano)",
       "Bash(findstr \":8001\")",
-      "Bash(dir \"C:/xampp/htdocs/IELTS-AI-Evaluator/homepage-image*\")"
+      "Bash(dir \"C:/xampp/htdocs/IELTS-AI-Evaluator/homepage-image*\")",
+      "Bash(xargs grep -l \"admin\")",
+      "Bash(xargs grep -l \"CREATE TABLE tasks\\\\|INSERT INTO tasks\\\\|UPDATE tasks\")",
+      "Bash(xargs grep -l \"INSERT INTO tasks\\\\|UPDATE tasks\\\\|CREATE TABLE tasks\")",
+      "Bash(xargs grep -l \"admin\\\\|manage.*task\\\\|create.*task\\\\|edit.*exam\")",
+      "Bash(xargs grep -l \"user_task_completions\\\\|exam_variants\")",
+      "Bash(xargs grep -l \"is_admin\\\\|admin_check\\\\|CREATE TABLE tasks\")",
+      "Bash(xargs grep -l \"exam_variant\\\\|rubric\")",
+      "Bash(xargs ls -lh)",
+      "Bash(vendor/bin/phpcs api/login.php api/submission-save.php worker.php admin/index.php api/admin/upload-task-image.php)",
+      "Bash(vendor/bin/phpcbf admin/index.php api/admin/upload-task-image.php)",
+      "Bash(vendor/bin/phpcs admin/index.php api/admin/upload-task-image.php)",
+      "Bash(vendor/bin/phpcbf api/admin/upload-task-image.php)",
+      "Bash(vendor/bin/phpcs admin/index.php api/admin/upload-task-image.php api/login.php api/submission-save.php worker.php practice.php)",
+      "Read(//c/xampp/mysql/bin/**)",
+      "Bash(./mysql.exe -u root -e \"SELECT id, LEFT\\(prompt, 60\\) as prompt_preview FROM ielts_evalai.tasks t JOIN ielts_evalai.exam_variants ev ON t.exam_variant_id = ev.id JOIN ielts_evalai.exams e ON ev.exam_id = e.id WHERE t.task_type = 'writing' AND t.task_number = 1 AND e.exam_type = 'academic' ORDER BY t.id ASC;\")",
+      "Bash(C:\\\\xampp\\\\mysql\\\\bin\\\\mysql.exe *)",
+      "Bash(C:\\\\xampp\\\\php\\\\php.exe *)",
+      "WebSearch"
     ]
   }
 }

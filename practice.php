@@ -41,21 +41,23 @@ $taskTitle = "Writing Task " . $task;
 $prompt = "";
 $taskId = null;
 $examVariantId = null;
+$taskImagePath = null;
 $allTasksCompleted = false;
 try {
     $pdo = db();
-  // Fetch a task that the user hasn't completed yet
+    // Fetch a task that the user hasn't completed yet
     $stmt = $pdo->prepare("
-    SELECT t.id, t.prompt, t.exam_variant_id
+    SELECT t.id, t.prompt, t.exam_variant_id, f.storage_key as task_image_path
     FROM tasks t
     JOIN exam_variants ev ON t.exam_variant_id = ev.id
     JOIN exams e ON ev.exam_id = e.id
-    WHERE t.task_type = 'writing' 
+    LEFT JOIN files f ON t.image_file_id = f.id
+    WHERE t.task_type = 'writing'
     AND t.task_number = ?
     AND e.exam_type = ?
     AND t.id NOT IN (
-      SELECT utc.task_id 
-      FROM user_task_completions utc 
+      SELECT utc.task_id
+      FROM user_task_completions utc
       WHERE utc.user_id = ?
     )
     ORDER BY RAND()
@@ -68,14 +70,16 @@ try {
         $prompt = $taskData['prompt'];
         $taskId = $taskData['id'];
         $examVariantId = $taskData['exam_variant_id'];
+        $taskImagePath = $taskData['task_image_path'];
     } else {
-      // If all tasks are completed, show a message or fetch any task
+        // If all tasks are completed, show a message or fetch any task
         $stmt = $pdo->prepare("
-      SELECT t.id, t.prompt, t.exam_variant_id
+      SELECT t.id, t.prompt, t.exam_variant_id, f.storage_key as task_image_path
       FROM tasks t
       JOIN exam_variants ev ON t.exam_variant_id = ev.id
       JOIN exams e ON ev.exam_id = e.id
-      WHERE t.task_type = 'writing' 
+      LEFT JOIN files f ON t.image_file_id = f.id
+      WHERE t.task_type = 'writing'
       AND t.task_number = ?
       AND e.exam_type = ?
       ORDER BY RAND()
@@ -88,7 +92,8 @@ try {
             $prompt = $taskData['prompt'];
             $taskId = $taskData['id'];
             $examVariantId = $taskData['exam_variant_id'];
-            $allTasksCompleted = true; // Flag to show message
+            $taskImagePath = $taskData['task_image_path'];
+            $allTasksCompleted = true;
         } else {
             $prompt = "No task found in database. Please add a task prompt.";
         }
@@ -142,6 +147,15 @@ try {
     <div class="practice-main">
       <div class="prompt-section">
         <h2>Task Prompt</h2>
+        <?php if ($taskImagePath) : ?>
+          <div class="task-image-wrapper">
+            <img
+              src="uploads/<?php echo htmlspecialchars($taskImagePath); ?>"
+              alt="Task chart/diagram"
+              class="task-image"
+            >
+          </div>
+        <?php endif; ?>
         <div class="prompt-content" id="promptContent">
           <?php echo nl2br(htmlspecialchars($prompt)); ?>
         </div>
@@ -169,26 +183,6 @@ try {
         <div class="word-count">
           <span id="wordCount">0</span> words
         </div>
-        <!-- Image upload for academic_task_1 -->
-        <?php if ($taskType === 'academic_task_1') : ?>
-          <div class="image-upload-section" style="margin-top: 15px;">
-            <label for="imageUpload" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
-              Upload Image (Optional)
-            </label>
-            <input 
-              type="file" 
-              id="imageUpload" 
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              style="padding: 8px; border: 2px solid #ddd; border-radius: 6px; width: 100%; font-size: 14px;"
-            >
-            <div id="imagePreview" style="margin-top: 10px; display: none;">
-              <img id="previewImg" src="" alt="Preview" style="max-width: 300px; max-height: 200px; border-radius: 6px; border: 2px solid #ddd;">
-              <button type="button" id="removeImage" style="margin-top: 5px; padding: 5px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                Remove Image
-              </button>
-            </div>
-          </div>
-        <?php endif; ?>
       </div>
 
       <div class="action-section">
@@ -220,41 +214,6 @@ essayInput.addEventListener('input', function() {
   const words = text ? text.split(/\s+/).filter(word => word.length > 0) : [];
   wordCount.textContent = words.length;
 });
-
-// Image upload handling (for academic_task_1)
-const imageUpload = document.getElementById('imageUpload');
-const imagePreview = document.getElementById('imagePreview');
-const previewImg = document.getElementById('previewImg');
-const removeImage = document.getElementById('removeImage');
-let selectedImageFile = null;
-
-if (imageUpload) {
-  imageUpload.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        alert('Image size must be less than 5MB');
-        this.value = '';
-        return;
-      }
-      selectedImageFile = file;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewImg.src = e.target.result;
-        imagePreview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-}
-
-if (removeImage) {
-  removeImage.addEventListener('click', function() {
-    selectedImageFile = null;
-    imageUpload.value = '';
-    imagePreview.style.display = 'none';
-  });
-}
 
 // Poll for submission status
 let pollInterval = null;
@@ -394,12 +353,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async function()
     formData.append('task_prompt', taskPrompt);
     formData.append('exam_variant_id', examVariantId);
     formData.append('essay', essayContent);
-    
-    // Add image if present
-    if (selectedImageFile) {
-      formData.append('image', selectedImageFile);
-    }
-    
+
     // Send to API
     const response = await fetch('api/submission-save.php', {
       method: 'POST',

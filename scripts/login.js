@@ -44,8 +44,7 @@ form.addEventListener("submit", async function (e) {
           // Redirect to 2FA verification page
             window.location.href = `verify-2fa.html?email=${encodeURIComponent(data.email || email)}`;
         } else {
-          // Redirect to homepage if 2FA is not required (shouldn't happen with new flow)
-            window.location.href = "index.php";
+            window.location.href = data.redirect || "index.php";
         }
     } catch (err) {
         showMessage(err.message, "error");
