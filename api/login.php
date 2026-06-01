@@ -71,6 +71,19 @@ try {
         $upd->execute(["h" => $newHash, "id" => $user["id"]]);
     }
 
+    // Admins skip 2FA and are logged in directly
+    if ((int)$user["is_admin"] === 1) {
+        setUserCookies((int)$user["id"], (string)$user["username"], (string)$user["email"], 1);
+        $upd = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = :id");
+        $upd->execute(["id" => $user["id"]]);
+        json_response(200, [
+            "ok"           => true,
+            "message"      => "Login successful.",
+            "requires_2fa" => false,
+            "redirect"     => "admin/index.php"
+        ]);
+    }
+
     // Send 2FA code instead of directly logging in
     try {
         $result = send2FAVerification((int)$user["id"], (string)$user["email"]);

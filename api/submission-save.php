@@ -77,52 +77,6 @@ try {
 
     // Calculate word count
     $wordCount = str_word_count($essay);
-// Handle image upload (for academic_task_1)
-    $imageFileId = null;
-    if ($taskType === 'academic_task_1' && isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $imageFile = $_FILES['image'];
-    // Validate file type
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $imageFile['tmp_name']);
-        finfo_close($finfo);
-        if (!in_array($mimeType, $allowedTypes)) {
-            json_response(400, ["ok" => false, "error" => "Invalid image type. Allowed: JPEG, PNG, GIF, WebP"]);
-        }
-
-        // Validate file size (5MB limit)
-        if ($imageFile['size'] > 5 * 1024 * 1024) {
-            json_response(400, ["ok" => false, "error" => "Image size must be less than 5MB"]);
-        }
-
-        // Generate unique filename
-        $extension = pathinfo($imageFile['name'], PATHINFO_EXTENSION);
-        $storageKey = 'submissions/' . date('Y/m/') . uniqid() . '_' . $userId . '.' . $extension;
-        $uploadDir = __DIR__ . '/../uploads/' . dirname($storageKey);
-    // Create directory if it doesn't exist
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        $uploadPath = __DIR__ . '/../uploads/' . $storageKey;
-    // Move uploaded file
-        if (!move_uploaded_file($imageFile['tmp_name'], $uploadPath)) {
-            json_response(500, ["ok" => false, "error" => "Failed to save image"]);
-        }
-
-        // Save file record to database
-        $stmt = $pdo->prepare("
-            INSERT INTO files (storage_key, mime, size_bytes, uploaded_by)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $storageKey,
-            $mimeType,
-            $imageFile['size'],
-            $userId
-        ]);
-        $imageFileId = $pdo->lastInsertId();
-    }
 
     // Start transaction
     $pdo->beginTransaction();
@@ -131,11 +85,7 @@ try {
         if (!$entitlementCheck['has_subscription']) {
             $deductResult = deductCreditForAnalysis($userId);
             if (!$deductResult['success']) {
-            // Rollback and delete uploaded file if it exists
                 $pdo->rollBack();
-                if (isset($uploadPath) && file_exists($uploadPath)) {
-                    unlink($uploadPath);
-                }
                 json_response(402, [
                     "ok" => false,
                     "error" => $deductResult['message']
@@ -153,9 +103,8 @@ try {
                 word_count,
                 task_prompt,
                 task_type,
-                image_file_id,
                 status
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
         ");
         $stmt->execute([
             $userId,
@@ -164,8 +113,7 @@ try {
             $essay,
             $wordCount,
             $taskPrompt,
-            $taskType,
-            $imageFileId
+            $taskType
         ]);
         $submissionId = $pdo->lastInsertId();
     // Mark task as completed in user_task_completions
@@ -192,11 +140,6 @@ try {
         ]);
     } catch (Exception $e) {
         $pdo->rollBack();
-    // Delete uploaded file if transaction failed
-        if ($imageFileId && isset($uploadPath) && file_exists($uploadPath)) {
-            unlink($uploadPath);
-        }
-
         throw $e;
     }
 } catch (PDOException $e) {
